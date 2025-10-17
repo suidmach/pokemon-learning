@@ -2209,6 +2209,9 @@ window.onload = function() {
   
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
+    // Only handle shortcuts when not typing in input fields
+    if (e.target.tagName === 'INPUT') return;
+    
     if (e.key === ' ' && continueBtn.style.display !== 'none') {
       e.preventDefault();
       nextQuestion();
@@ -2216,6 +2219,11 @@ window.onload = function() {
     if (e.key === 'h' && hintBtn.style.display !== 'none') {
       e.preventDefault();
       showHint();
+    }
+    // Add Enter key support for submit when input is focused
+    if (e.key === 'Enter' && inputRow.style.display !== 'none') {
+      e.preventDefault();
+      submitAnswer();
     }
   });
   
