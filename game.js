@@ -23,38 +23,71 @@ const achievements = {
   'rocket_defeated': { name: 'Rocket Buster', description: 'Beat Team Rocket 5 times' },
   'dex_complete': { name: 'Pokédex Master', description: 'Filled the entire Pokédex' },
   'egg_collector': { name: 'Egg Collector', description: 'Collected 10 eggs' },
-  'speed_typist': { name: 'Speed Typist', description: 'Answered in under 2 seconds' }
+  'speed_typist': { name: 'Speed Typist', description: 'Answered in under 2 seconds' },
+  'reading_master': { name: 'Reading Master', description: 'Mastered 50 reading questions' },
+  'phonics_pro': { name: 'Phonics Pro', description: 'Completed 25 phonics challenges' }
 };
 
-const STORAGE_KEY = 'spelling_numbers_finn_v3';
+// Reading word lists for different skill levels
+const readingWords = {
+  simple: ['cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'mat', 'bat', 'sit', 'top', 'hop', 'cup', 'bug', 'fun', 'pig', 'bag', 'leg', 'web', 'pen'],
+  medium: ['jump', 'swim', 'play', 'happy', 'truck', 'clock', 'smile', 'green', 'snake', 'bread', 'chair', 'plant', 'beach', 'sheep', 'brown', 'quick', 'earth', 'light'],
+  hard: ['elephant', 'butterfly', 'rainbow', 'adventure', 'beautiful', 'computer', 'dinosaur', 'umbrella', 'basketball', 'chocolate', 'telephone', 'helicopter', 'photograph', 'restaurant']
+};
+
+const sightWords = ['the', 'and', 'to', 'a', 'I', 'you', 'it', 'in', 'said', 'for', 'up', 'look', 'is', 'go', 'we', 'little', 'down', 'can', 'see', 'not', 'one', 'my', 'me', 'big', 'come', 'blue', 'red', 'where', 'jump', 'away', 'here', 'help', 'make', 'yellow', 'two', 'play', 'run', 'find', 'three', 'funny'];
+
+const rhymingPairs = {
+  'cat': ['bat', 'hat', 'mat', 'rat'],
+  'dog': ['log', 'fog', 'hog', 'jog'],
+  'sun': ['run', 'fun', 'bun', 'gun'],
+  'tree': ['bee', 'see', 'free', 'knee'],
+  'cake': ['make', 'take', 'lake', 'wake'],
+  'ball': ['call', 'fall', 'tall', 'wall']
+};
+
+const STORAGE_KEY = 'spelling_numbers_finn_v4';
 let state = {
+  gameMode: 'mixed', // 'numbers', 'reading', 'mixed'
   difficulty: 1,
   streak: 0,
   mastered: [],
+  readingMastered: [],
   mistakes: {},
+  readingMistakes: {},
   collection: [],
   stolen: [],
   lastQuestion: null,
   correctTotal: 0,
+  readingTotal: 0,
   sound: true,
+  hints: true,
   milestones: [],
   achievementsUnlocked: {},
   eggs: [],
   hatched: [],
-  rocketWins: 0
+  rocketWins: 0,
+  phonicsCompleted: 0
 };
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) state = JSON.parse(raw);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      state = { ...state, ...loaded };
+    }
   } catch (e) {
-    console.warn(e);
+    console.warn('Error loading save data:', e);
   }
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn('Error saving data:', e);
+  }
 }
 
 load();
@@ -84,7 +117,8 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(text);
     const v = speechSynthesis.getVoices().find(v => /female|zira|susan|kathy/i.test((v.name || '') + (v.lang || '') + (v.voiceURI || '')));
     if (v) u.voice = v;
-    u.rate = 0.95;
+    u.rate = 0.8;
+    u.pitch = 1.1;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   }
@@ -103,14 +137,33 @@ function playSound(type) {
       o.frequency.value = 880;
       o.type = 'sine';
       g.gain.value = 0.07;
-    } else {
+    } else if (type === 'wrong') {
       o.frequency.value = 220;
       o.type = 'sawtooth';
       g.gain.value = 0.07;
+    } else if (type === 'achievement') {
+      // Play a sequence of notes for achievements
+      const notes = [523, 659, 784, 1047]; // C, E, G, C
+      notes.forEach((freq, i) => {
+        setTimeout(() => {
+          const o2 = ctx.createOscillator();
+          const g2 = ctx.createGain();
+          o2.connect(g2);
+          g2.connect(ctx.destination);
+          o2.frequency.value = freq;
+          o2.type = 'sine';
+          g2.gain.value = 0.05;
+          o2.start();
+          o2.stop(ctx.currentTime + 0.2);
+        }, i * 150);
+      });
+      return;
     }
     o.start();
     o.stop(ctx.currentTime + 0.14);
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Audio error:', e);
+  }
 }
 
 function getRarity(index) {
@@ -121,16 +174,17 @@ function getRarity(index) {
 
 function getCatchChance(index) {
   const r = getRarity(index);
-  if (r === 'legendary') return 0.08;
-  if (r === 'rare') return 0.28;
-  return 0.65;
+  if (r === 'legendary') return 0.12;
+  if (r === 'rare') return 0.35;
+  return 0.75;
 }
 
 function unlockAchievement(key) {
   if (!state.achievementsUnlocked[key]) {
     state.achievementsUnlocked[key] = true;
     save();
-    showTempMessage(`🏆 Achievement unlocked: ${achievements[key].name}`, 2200);
+    playSound('achievement');
+    showTempMessage(`🏆 Achievement unlocked: ${achievements[key].name}`, 3000, 'success');
     renderAchievements();
   }
 }
@@ -155,28 +209,41 @@ const answerInput = document.getElementById('answerInput');
 const encounterArea = document.getElementById('encounterArea');
 const collectionBar = document.getElementById('collectionBar');
 const difficultyLabel = document.getElementById('difficultyLabel');
+const streakLabel = document.getElementById('streakLabel');
+const totalLabel = document.getElementById('totalLabel');
 const continueBtn = document.getElementById('continueBtn');
 const eggsBar = document.getElementById('eggsBar');
 const soundToggle = document.getElementById('soundToggle');
+const hintsToggle = document.getElementById('hintsToggle');
+const hintBtn = document.getElementById('hintBtn');
 
 let gameTimerInterval = null;
 let retryState = null;
 let lastQuestionStart = 0;
 let currentAnswer = null;
 let selectedLetters = [];
+let currentQuestionType = null;
 
 // ========== GAME FLOW ==========
-function updateDifficultyLabel() {
-  difficultyLabel.textContent = 'Mixed Questions';
+function updateStats() {
+  const modeNames = {
+    'numbers': 'Numbers Only',
+    'reading': 'Reading Only', 
+    'mixed': 'Mixed Learning'
+  };
+  difficultyLabel.textContent = modeNames[state.gameMode] || 'Mixed Learning';
+  streakLabel.textContent = state.streak;
+  totalLabel.textContent = state.correctTotal + state.readingTotal;
 }
 
 function startGame() {
-  state.difficulty = 1;
   state.streak = 0;
   save();
   updateCollectionBar();
   renderEggs();
   renderAchievements();
+  updateStats();
+  
   if (!gameTimerInterval) {
     gameTimerInterval = setInterval(checkEggs, 1000);
   }
@@ -186,7 +253,7 @@ function startGame() {
 
 function quitToMenu() {
   // Don't allow quitting during a question - they must answer it
-  if (state.lastQuestion !== null) {
+  if (state.lastQuestion !== null || retryState !== null) {
     showTempMessage('Please finish this question first!', 2000, 'hint');
     return;
   }
@@ -199,8 +266,8 @@ function pickWeightedCreature() {
   creatures.forEach(c => {
     const r = getRarity(c.index);
     let w = (r === 'common' ? 10 : (r === 'rare' ? 4 : 1));
-    if (state.correctTotal > 50 && r === 'rare') w += 3;
-    if (state.correctTotal > 120 && r === 'legendary') w += 2;
+    if (state.correctTotal + state.readingTotal > 50 && r === 'rare') w += 3;
+    if (state.correctTotal + state.readingTotal > 120 && r === 'legendary') w += 2;
     for (let i = 0; i < w; i++) pool.push(c);
   });
   return pool[Math.floor(Math.random() * pool.length)];
@@ -218,43 +285,270 @@ function chooseNumber() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+function chooseReadingWord() {
+  const allWords = [...readingWords.simple, ...readingWords.medium, ...readingWords.hard, ...sightWords];
+  const pool = [];
+  
+  for (let word of allWords) {
+    const mastered = state.readingMastered.includes(word);
+    const mistakes = state.readingMistakes[word] || 0;
+    const m = mastered ? 1 : 3;
+    const weight = Math.max(1, m + mistakes);
+    for (let i = 0; i < weight; i++) pool.push(word);
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function nextQuestion() {
-  updateDifficultyLabel();
+  updateStats();
   document.getElementById('feedback').textContent = '';
   document.getElementById('feedback').className = 'small center';
   encounterArea.innerHTML = '';
   continueBtn.style.display = 'none';
   inputRow.style.display = 'none';
+  hintBtn.style.display = 'none';
   optEl.innerHTML = '';
   answerInput.value = '';
   answerInput.placeholder = 'Type your answer';
   retryState = null;
   lastQuestionStart = Date.now();
+  currentQuestionType = null;
   
-  const n = chooseNumber();
-  state.lastQuestion = n;
-  const word = numToWords(n);
+  // Determine question type based on game mode
+  let questionTypes = [];
   
-  // All question types randomly mixed
-  const types = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
-                 'placeValue', 'placeValueReverse', 'placeValueDifferent',
-                 'nearestTen', 'compare', 'orderNumbers', 'findPattern'];
-  const type = types[Math.floor(Math.random() * types.length)];
+  if (state.gameMode === 'numbers') {
+    questionTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
+                     'placeValue', 'placeValueReverse', 'placeValueDifferent',
+                     'nearestTen', 'compare', 'orderNumbers', 'findPattern'];
+  } else if (state.gameMode === 'reading') {
+    questionTypes = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'];
+  } else { // mixed mode
+    const numTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
+                      'placeValue', 'nearestTen', 'compare'];
+    const readTypes = ['readWord', 'sightWord', 'rhyming', 'phonics'];
+    questionTypes = [...numTypes, ...readTypes];
+  }
+  
+  const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+  currentQuestionType = type;
+  
+  // Set state.lastQuestion for both number and reading questions
+  if (['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(type)) {
+    state.lastQuestion = chooseReadingWord();
+  } else {
+    state.lastQuestion = chooseNumber();
+  }
 
-  if (type === 'spellTiles') showSpellTiles(n, word);
-  else if (type === 'countForward') showCountForward(n);
-  else if (type === 'countBackward') showCountBackward(n);
+  // Show the appropriate question
+  if (type === 'spellTiles') showSpellTiles(state.lastQuestion, numToWords(state.lastQuestion));
+  else if (type === 'countForward') showCountForward(state.lastQuestion);
+  else if (type === 'countBackward') showCountBackward(state.lastQuestion);
   else if (type === 'skipCount') showSkipCount();
-  else if (type === 'placeValue') showPlaceValue(n);
-  else if (type === 'placeValueReverse') showPlaceValueReverse(n);
-  else if (type === 'placeValueDifferent') showPlaceValueDifferent(n);
-  else if (type === 'nearestTen') showNearestTen(n);
+  else if (type === 'placeValue') showPlaceValue(state.lastQuestion);
+  else if (type === 'placeValueReverse') showPlaceValueReverse(state.lastQuestion);
+  else if (type === 'placeValueDifferent') showPlaceValueDifferent(state.lastQuestion);
+  else if (type === 'nearestTen') showNearestTen(state.lastQuestion);
   else if (type === 'compare') showCompare();
   else if (type === 'orderNumbers') showOrderNumbers();
   else if (type === 'findPattern') showFindPattern();
+  else if (type === 'readWord') showReadWord(state.lastQuestion);
+  else if (type === 'sightWord') showSightWord(state.lastQuestion);
+  else if (type === 'rhyming') showRhyming();
+  else if (type === 'phonics') showPhonics(state.lastQuestion);
+  else if (type === 'syllables') showSyllables(state.lastQuestion);
+  else if (type === 'letterSounds') showLetterSounds();
 }
 
-// ========== QUESTION RENDERERS ==========
+// ========== READING QUESTION TYPES ==========
+function showReadWord(word) {
+  currentAnswer = word;
+  qEl.textContent = `Read this word out loud, then type it:`;
+  
+  optEl.innerHTML = `<div class="word-display" id="wordDisplay">${word.toUpperCase()}</div>`;
+  
+  speak(`Read this word: ${word}`);
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type the word you see';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showSightWord(word) {
+  if (!sightWords.includes(word)) {
+    word = sightWords[Math.floor(Math.random() * sightWords.length)];
+  }
+  currentAnswer = word;
+  
+  qEl.textContent = `Listen and type this sight word:`;
+  
+  setTimeout(() => {
+    speak(word);
+  }, 500);
+  
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type what you heard';
+  answerInput.focus();
+  
+  const repeatBtn = document.createElement('button');
+  repeatBtn.textContent = '🔊 Repeat';
+  repeatBtn.className = 'secondary';
+  repeatBtn.onclick = () => speak(word);
+  optEl.appendChild(repeatBtn);
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showRhyming() {
+  const baseWords = Object.keys(rhymingPairs);
+  const baseWord = baseWords[Math.floor(Math.random() * baseWords.length)];
+  const rhymes = rhymingPairs[baseWord];
+  const correctRhyme = rhymes[Math.floor(Math.random() * rhymes.length)];
+  
+  currentAnswer = correctRhyme;
+  
+  qEl.textContent = `Which word rhymes with "${baseWord}"?`;
+  
+  const wrongChoices = [];
+  const allWords = [...readingWords.simple, ...readingWords.medium];
+  while (wrongChoices.length < 3) {
+    const word = allWords[Math.floor(Math.random() * allWords.length)];
+    if (!rhymes.includes(word) && word !== baseWord && !wrongChoices.includes(word)) {
+      wrongChoices.push(word);
+    }
+  }
+  
+  const choices = [correctRhyme, ...wrongChoices];
+  shuffleArray(choices);
+  
+  speak(`Which word rhymes with ${baseWord}?`);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
+}
+
+function showPhonics(word) {
+  currentAnswer = word;
+  
+  // Break word into phonemes for display
+  const phonemes = word.split('').join(' - ');
+  
+  qEl.textContent = `Sound out this word and type it:`;
+  optEl.innerHTML = `<div class="phonics-display">${phonemes.toUpperCase()}</div>`;
+  
+  speak(`Sound out this word: ${word.split('').join(', ')}`);
+  
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type the word';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showSyllables(word) {
+  const syllableCount = countSyllables(word);
+  currentAnswer = String(syllableCount);
+  
+  qEl.textContent = `How many syllables are in "${word}"?`;
+  
+  speak(`How many syllables are in ${word}?`);
+  
+  const options = [1, 2, 3, 4];
+  options.forEach((count, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = `${count} syllable${count !== 1 ? 's' : ''}`;
+    btn.className = 'syllable-btn';
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(String(count));
+    optEl.appendChild(btn);
+  });
+}
+
+function showLetterSounds() {
+  const letters = 'abcdefghijklmnopqrstuvwxyz';
+  const letter = letters[Math.floor(Math.random() * letters.length)];
+  currentAnswer = letter;
+  
+  qEl.textContent = `What letter makes this sound?`;
+  
+  const letterSound = getLetterSound(letter);
+  setTimeout(() => {
+    speak(letterSound);
+  }, 500);
+  
+  const wrongLetters = [];
+  while (wrongLetters.length < 3) {
+    const wrongLetter = letters[Math.floor(Math.random() * letters.length)];
+    if (wrongLetter !== letter && !wrongLetters.includes(wrongLetter)) {
+      wrongLetters.push(wrongLetter);
+    }
+  }
+  
+  const choices = [letter, ...wrongLetters];
+  shuffleArray(choices);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice.toUpperCase();
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
+  
+  const repeatBtn = document.createElement('button');
+  repeatBtn.textContent = '🔊 Repeat Sound';
+  repeatBtn.className = 'secondary';
+  repeatBtn.onclick = () => speak(letterSound);
+  optEl.appendChild(repeatBtn);
+}
+
+// Helper functions for reading questions
+function countSyllables(word) {
+  const vowels = 'aeiouy';
+  let count = 0;
+  let prevIsVowel = false;
+  
+  for (let i = 0; i < word.length; i++) {
+    const isVowel = vowels.includes(word[i].toLowerCase());
+    if (isVowel && !prevIsVowel) count++;
+    prevIsVowel = isVowel;
+  }
+  
+  if (word.endsWith('e')) count--;
+  return Math.max(1, count);
+}
+
+function getLetterSound(letter) {
+  const sounds = {
+    'a': 'ah', 'b': 'buh', 'c': 'kuh', 'd': 'duh', 'e': 'eh',
+    'f': 'fuh', 'g': 'guh', 'h': 'huh', 'i': 'ih', 'j': 'juh',
+    'k': 'kuh', 'l': 'luh', 'm': 'muh', 'n': 'nuh', 'o': 'oh',
+    'p': 'puh', 'q': 'kwuh', 'r': 'ruh', 's': 'sss', 't': 'tuh',
+    'u': 'uh', 'v': 'vuh', 'w': 'wuh', 'x': 'ksss', 'y': 'yuh', 'z': 'zzz'
+  };
+  return sounds[letter] || letter;
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// ========== NUMBER QUESTION RENDERERS ==========
 function showSpellTiles(n, word) {
   currentAnswer = word;
   selectedLetters = [];
@@ -263,7 +557,7 @@ function showSpellTiles(n, word) {
   const letters = word.split('').filter(c => c !== ' ' && c !== '-');
   const shuffled = [...letters].sort(() => Math.random() - 0.5);
   
-  optEl.innerHTML = '<div class="tile-display" id="tileDisplay"></div><div class="tile-bank" id="tileBank"></div>';
+  optEl.innerHTML = '<div class="tile-display" id="tileDisplay">Click letters to spell the word</div><div class="tile-bank" id="tileBank"></div>';
   const tileBank = document.getElementById('tileBank');
   
   shuffled.forEach((letter, i) => {
@@ -287,6 +581,10 @@ function showSpellTiles(n, word) {
   tileBank.appendChild(submitBtn);
   
   speak(`Spell the number ${n}`);
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function selectLetter(letter, tile) {
@@ -308,7 +606,14 @@ function clearLetters() {
 function updateTileDisplay() {
   const display = document.getElementById('tileDisplay');
   if (!display) return;
-  display.textContent = selectedLetters.join('') || '(click letters)';
+  
+  if (selectedLetters.length > 0) {
+    display.textContent = selectedLetters.join('');
+    display.classList.add('has-content');
+  } else {
+    display.textContent = 'Click letters to spell the word';
+    display.classList.remove('has-content');
+  }
 }
 
 function checkSpelling() {
@@ -325,6 +630,10 @@ function showCountForward(n) {
   speak(`What number comes after ${n}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showCountBackward(n) {
@@ -334,6 +643,10 @@ function showCountBackward(n) {
   speak(`What number comes before ${n}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showSkipCount() {
@@ -350,6 +663,10 @@ function showSkipCount() {
   speak(`Skip count by ${skip}s`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showPlaceValue(n) {
@@ -363,6 +680,10 @@ function showPlaceValue(n) {
   speak(`${h} hundreds, ${t} tens, ${o} ones`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showPlaceValueReverse(n) {
@@ -400,6 +721,10 @@ function showPlaceValueReverse(n) {
   submitBtn.onclick = submitPlaceValue;
   submitBtn.style.marginTop = '15px';
   optEl.appendChild(submitBtn);
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function submitPlaceValue() {
@@ -447,6 +772,10 @@ function showPlaceValueDifferent(n) {
   submitBtn.onclick = submitPlaceValueDiff;
   submitBtn.style.marginTop = '15px';
   optEl.appendChild(submitBtn);
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function submitPlaceValueDiff() {
@@ -467,6 +796,10 @@ function showNearestTen(n) {
   speak(`What is the nearest ten to ${n}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showCompare() {
@@ -508,6 +841,10 @@ function showOrderNumbers() {
   inputRow.style.display = 'flex';
   answerInput.placeholder = 'e.g. 5 10 15 20';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
 }
 
 function showFindPattern() {
@@ -530,6 +867,43 @@ function showFindPattern() {
   speak(`Find the missing number`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+// ========== HINT SYSTEM ==========
+function showHint() {
+  if (!state.hints) return;
+  
+  let hint = '';
+  
+  if (currentQuestionType === 'spellTiles') {
+    hint = `The word starts with "${currentAnswer[0]}" and has ${currentAnswer.replace(/[\s-]/g, '').length} letters.`;
+  } else if (currentQuestionType === 'countForward') {
+    hint = `When counting up, the next number after ${state.lastQuestion} is ${state.lastQuestion + 1}.`;
+  } else if (currentQuestionType === 'countBackward') {
+    hint = `When counting down, the number before ${state.lastQuestion} is ${state.lastQuestion - 1}.`;
+  } else if (currentQuestionType === 'readWord') {
+    hint = `Try sounding out each letter: ${state.lastQuestion.split('').join('-')}`;
+  } else if (currentQuestionType === 'sightWord') {
+    hint = `This is a common word that starts with "${currentAnswer[0]}".`;
+  } else if (currentQuestionType === 'phonics') {
+    hint = `Listen carefully to each sound and put them together.`;
+  } else if (currentQuestionType === 'nearestTen') {
+    const n = state.lastQuestion;
+    const mod = n % 10;
+    if (mod < 5) {
+      hint = `${n} is closer to ${n - mod} because ${mod} is less than 5.`;
+    } else {
+      hint = `${n} is closer to ${n + (10 - mod)} because ${mod} is 5 or more.`;
+    }
+  } else {
+    hint = `Think about what you know about this type of problem.`;
+  }
+  
+  showTempMessage(`💡 Hint: ${hint}`, 4000, 'hint');
 }
 
 // ========== SUBMISSION & RETRY LOGIC ==========
@@ -551,7 +925,7 @@ function submitAnswer() {
   if (retryState === 'force') {
     if (val === correct) return handleCorrect();
     else {
-      showTempMessage(`Please type the correct answer.`, 1500, 'hint');
+      showTempMessage(`Please type the correct answer: ${currentAnswer}`, 1500, 'hint');
       return;
     }
   }
@@ -565,34 +939,57 @@ function handleCorrect() {
   if (timeTaken < 2000) unlockAchievement('speed_typist');
   
   state.streak++;
-  state.correctTotal++;
+  
+  // Determine if this was a number or reading question
+  const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
+  
+  if (isReadingQuestion) {
+    state.readingTotal++;
+    if (!state.readingMastered.includes(state.lastQuestion)) {
+      state.readingMastered.push(state.lastQuestion);
+    }
+    if (currentQuestionType === 'phonics') {
+      state.phonicsCompleted++;
+      if (state.phonicsCompleted >= 25) unlockAchievement('phonics_pro');
+    }
+    if (state.readingTotal >= 50) unlockAchievement('reading_master');
+  } else {
+    state.correctTotal++;
+    if (!state.mastered.includes(state.lastQuestion)) {
+      state.mastered.push(state.lastQuestion);
+    }
+  }
+  
   playSound('correct');
   
-  if (state.streak >= 5 && state.difficulty < 3) {
-    state.difficulty++;
+  if (state.streak >= 20) {
+    unlockAchievement('streak_master');
     state.streak = 0;
   }
   
-  if (!state.mastered.includes(state.lastQuestion)) {
-    state.mastered.push(state.lastQuestion);
-  }
-  
-  state.lastQuestion = null; // ADD THIS LINE - Clear question after correct answer
-  
+  state.lastQuestion = null; // Clear question after correct answer
+  retryState = null;
   save();
-  showTempMessage('Excellent!', 800, 'success');
+  
+  const encouragements = [
+    'Excellent!', 'Great job!', 'Perfect!', 'Amazing!', 'Well done!', 
+    'Fantastic!', 'You got it!', 'Super!', 'Brilliant!', 'Outstanding!'
+  ];
+  const msg = encouragements[Math.floor(Math.random() * encouragements.length)];
+  showTempMessage(msg, 800, 'success');
   
   if (state.streak >= 10) {
     triggerEvolution();
     state.streak = 0;
   }
   
-  if (state.correctTotal > 0 && state.correctTotal % 20 === 0) {
+  // Team Rocket battle every 15 correct answers (combined)
+  if ((state.correctTotal + state.readingTotal) > 0 && (state.correctTotal + state.readingTotal) % 15 === 0) {
     triggerRocketBattle();
     return;
   }
   
-  if (Math.random() < 0.08) giveEgg();
+  if (Math.random() < 0.12) giveEgg();
   
   maybeEncounter();
   
@@ -600,33 +997,46 @@ function handleCorrect() {
     setTimeout(() => nextQuestion(), 700);
   }
 }
+
 function handleWrong(correct) {
   state.streak = 0;
   playSound('wrong');
-  state.mistakes[state.lastQuestion] = (state.mistakes[state.lastQuestion] || 0) + 1;
+  
+  // Track mistakes for both number and reading questions
+  const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
+  
+  if (isReadingQuestion) {
+    state.readingMistakes[state.lastQuestion] = (state.readingMistakes[state.lastQuestion] || 0) + 1;
+  } else {
+    state.mistakes[state.lastQuestion] = (state.mistakes[state.lastQuestion] || 0) + 1;
+  }
+  
   save();
   
   if (!retryState) {
     retryState = { hinted: true };
-    showTempMessage(`Hint: it starts with "${String(correct)[0]}" — try again.`, 3000, 'hint');
+    showTempMessage(`Hint: The answer starts with "${String(correct)[0]}" — try again!`, 3000, 'hint');
     inputRow.style.display = 'flex';
+    answerInput.focus();
   } else if (retryState && retryState.hinted) {
     retryState = 'force';
-    showTempMessage(`Type the correct answer now to continue: ${correct}`, 5000, 'error');
+    showTempMessage(`Type the correct answer to continue: ${correct}`, 5000, 'error');
     inputRow.style.display = 'flex';
+    answerInput.focus();
   } else {
     retryState = 'force';
     showTempMessage(`Type the correct answer to continue: ${correct}`, 5000, 'error');
     inputRow.style.display = 'flex';
+    answerInput.focus();
   }
 }
 
 // ========== ENCOUNTERS & CATCHING ==========
 function maybeEncounter() {
-  const chance = 0.30;
+  const chance = 0.35;
   if (Math.random() > chance) return;
   
-  if (state.stolen.length > 0 && Math.random() < 0.35) {
+  if (state.stolen.length > 0 && Math.random() < 0.4) {
     const stolenId = state.stolen[Math.floor(Math.random() * state.stolen.length)];
     const crit = creatures.find(c => c.id === stolenId);
     if (crit) return spawnEncounter(crit, true);
@@ -634,7 +1044,7 @@ function maybeEncounter() {
   
   const crit = pickWeightedCreature();
   if (getRarity(crit.index) === 'legendary') {
-    if (!state.milestones.includes('legendary-' + crit.index) && Math.random() > 0.12) return;
+    if (!state.milestones.includes('legendary-' + crit.index) && Math.random() > 0.15) return;
   }
   spawnEncounter(crit, false);
 }
@@ -667,7 +1077,7 @@ function spawnEncounter(crit, isStolen = false) {
       encounterArea.innerHTML = '';
       nextQuestion();
     }, 900);
-  }, 4500);
+  }, 5000);
 
   btnCatch.onclick = () => {
     if (resolved) return;
@@ -693,7 +1103,7 @@ function spawnEncounter(crit, isStolen = false) {
       setTimeout(() => {
         encounterArea.innerHTML = '';
         nextQuestion();
-      }, 1000);
+      }, 1200);
     } else {
       encounterArea.innerHTML = `<div class="small center">💨 Oh no — ${crit.name} escaped!</div>`;
       setTimeout(() => {
@@ -818,64 +1228,111 @@ function triggerEvolution() {
 }
 
 let rocketBattleCorrect = 0;
-let rocketBattleQuestion = null;
+let rocketBattleTotal = 3;
+let rocketQuestions = [];
 
 function triggerRocketBattle() {
   showScreen('rocketBattle');
-  const rocketWords = ['one hundred', 'one hundred fifty', 'two hundred'];
-  const rocketWord = rocketWords[Math.floor(Math.random() * rocketWords.length)];
-  rocketBattleQuestion = rocketWord;
-  document.getElementById('rocketQuestion').textContent = `Spell this to defeat Team Rocket: ${rocketWord.replace(/\w/g, '_ ')}`;
-  document.getElementById('rocketFeedback').textContent = '';
+  
+  // Generate 3 challenging questions for the rocket battle
+  rocketQuestions = [
+    { question: 'Spell: one hundred fifty', answer: 'one hundred fifty' },
+    { question: 'What comes after 199?', answer: '200' },
+    { question: 'Spell: ninety-nine', answer: 'ninety-nine' }
+  ];
+  
   rocketBattleCorrect = 0;
+  updateRocketQuestion();
+}
+
+function updateRocketQuestion() {
+  if (rocketBattleCorrect >= rocketBattleTotal) {
+    handleRocketVictory();
+    return;
+  }
+  
+  const currentQ = rocketQuestions[rocketBattleCorrect];
+  document.getElementById('rocketQuestion').textContent = currentQ.question;
+  document.getElementById('rocketFeedback').textContent = '';
+  document.getElementById('rocketProgress').textContent = `${rocketBattleCorrect}/${rocketBattleTotal}`;
   
   const rocketOptions = document.getElementById('rocketOptions');
   rocketOptions.innerHTML = '';
+  
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Type your answer';
   input.id = 'rocketAnswerInput';
+  input.style.width = '300px';
+  input.style.fontSize = '1.1rem';
   
   const btn = document.createElement('button');
-  btn.textContent = 'Submit';
-  btn.onclick = () => {
-    const val = input.value.trim().toLowerCase();
-    if (val === rocketBattleQuestion) {
-      rocketBattleCorrect++;
-      document.getElementById('rocketFeedback').textContent = 'Correct!';
-      if (rocketBattleCorrect >= 3) {
-        handleRocketVictory();
-      } else {
-        document.getElementById('rocketQuestion').textContent = `Spell it again! (${3 - rocketBattleCorrect} more to go)`;
-        input.value = '';
-      }
-    } else {
-      document.getElementById('rocketFeedback').textContent = `Incorrect! Get it right to continue.`;
-    }
+  btn.textContent = 'Submit Answer';
+  btn.onclick = submitRocketAnswer;
+  
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') submitRocketAnswer();
   };
   
   rocketOptions.appendChild(input);
   rocketOptions.appendChild(btn);
+  
+  // Focus the input
+  setTimeout(() => input.focus(), 100);
+  
+  speak(currentQ.question);
+}
+
+function submitRocketAnswer() {
+  const input = document.getElementById('rocketAnswerInput');
+  const answer = input.value.trim().toLowerCase();
+  const correctAnswer = rocketQuestions[rocketBattleCorrect].answer.toLowerCase();
+  
+  if (answer === correctAnswer) {
+    rocketBattleCorrect++;
+    document.getElementById('rocketFeedback').textContent = `Correct! ${rocketBattleTotal - rocketBattleCorrect} more to go!`;
+    document.getElementById('rocketFeedback').className = 'small center feedback-success';
+    
+    setTimeout(() => {
+      updateRocketQuestion();
+    }, 1500);
+  } else {
+    document.getElementById('rocketFeedback').textContent = `Not quite right. Try again!`;
+    document.getElementById('rocketFeedback').className = 'small center feedback-error';
+    input.value = '';
+    input.focus();
+  }
 }
 
 function handleRocketVictory() {
   state.rocketWins++;
   if (state.rocketWins >= 5) unlockAchievement('rocket_defeated');
-  showTempMessage(`You defeated Team Rocket!`, 3000, 'success');
   
-  if (state.collection.length > 0) {
+  showScreen('victory');
+  document.getElementById('victoryMessage').textContent = `🎉 You defeated Team Rocket! This is victory #${state.rocketWins}!`;
+  
+  const rewards = document.getElementById('victoryRewards');
+  rewards.innerHTML = '<h3>Rewards:</h3>';
+  
+  // Give rewards
+  const rewardCount = 2 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < rewardCount; i++) {
+    const creature = pickWeightedCreature();
+    addToCollection(creature.id);
+    rewards.innerHTML += `<p>🎁 Caught ${creature.name}!</p>`;
+  }
+  
+  // Sometimes steal a creature (but not if they only have a few)
+  if (state.collection.length > 5 && Math.random() < 0.3) {
     const stolenCreature = state.collection[Math.floor(Math.random() * state.collection.length)];
     state.stolen.push(stolenCreature);
     state.collection = state.collection.filter(c => c !== stolenCreature);
     const crit = creatures.find(c => c.id === stolenCreature);
-    showTempMessage(`But they stole your ${crit.name}!`, 3000, 'error');
+    rewards.innerHTML += `<p style="color: #ef4444;">😈 Team Rocket stole your ${crit.name}!</p>`;
   }
   
-  setTimeout(() => {
-    showScreen('game');
-    updateCollectionBar();
-    nextQuestion();
-  }, 1500);
+  save();
+  updateCollectionBar();
 }
 
 // ========== SCREENS & NAVIGATION ==========
@@ -887,7 +1344,7 @@ function showScreen(id) {
     updateCollectionBar();
     renderEggs();
     renderAchievements();
-    updateDifficultyLabel();
+    updateStats();
   }
   if (id === 'map') renderMap();
   if (id === 'dex') renderDex();
@@ -902,13 +1359,22 @@ function renderMap() {
     const tile = document.createElement('div');
     tile.className = 'map-tile';
     tile.textContent = i;
-    if (state.mastered.includes(i)) tile.classList.add('completed');
+    if (state.mastered.includes(i)) {
+      tile.classList.add('completed');
+    } else if (state.mistakes[i] > 0) {
+      tile.classList.add('partial');
+    }
+    tile.title = `Number ${i}: ${state.mastered.includes(i) ? 'Mastered' : (state.mistakes[i] ? `${state.mistakes[i]} mistakes` : 'Not attempted')}`;
     mapGrid.appendChild(tile);
   }
 }
 
 function renderDex() {
   const dexGrid = document.getElementById('dexGrid');
+  const dexProgress = document.getElementById('dexProgress');
+  
+  dexProgress.textContent = `${state.collection.length} / ${creatures.length} caught`;
+  
   dexGrid.innerHTML = '';
   creatures.forEach(c => {
     const el = document.createElement('div');
@@ -928,32 +1394,53 @@ function renderDex() {
 
 function renderAnalytics() {
   const content = document.getElementById('analyticsContent');
+  const totalAnswers = state.correctTotal + state.readingTotal;
+  
   content.innerHTML = `
     <h3>Overall Progress</h3>
-    <p>Correct Answers: <strong>${state.correctTotal}</strong></p>
+    <p>Total Correct Answers: <strong>${totalAnswers}</strong></p>
+    <p>Number Questions: <strong>${state.correctTotal}</strong></p>
+    <p>Reading Questions: <strong>${state.readingTotal}</strong></p>
     <p>Mastered Numbers: <strong>${state.mastered.length} / ${MAX_NUM}</strong></p>
+    <p>Reading Words Mastered: <strong>${state.readingMastered.length}</strong></p>
     <p>Pokédex Completion: <strong>${state.collection.length} / ${creatures.length}</strong></p>
     <p>Team Rocket Wins: <strong>${state.rocketWins}</strong></p>
     <p>Eggs Collected: <strong>${state.hatched.length + state.eggs.length}</strong></p>
-    <p>Stolen Pokémon: <strong>${state.stolen.length}</strong></p>
+    <p>Phonics Challenges: <strong>${state.phonicsCompleted}</strong></p>
     <hr style="margin:20px 0; border: none; border-top: 1px dashed #ccc;">
-    <h3>Most Mistakes</h3>
+    <h3>Areas for Practice</h3>
     <ul id="mistakesList"></ul>
   `;
   
   const mistakesList = document.getElementById('mistakesList');
-  const sortedMistakes = Object.entries(state.mistakes).sort(([, a], [, b]) => b - a);
-  if (sortedMistakes.length === 0) {
-    mistakesList.innerHTML = '<li>No mistakes yet!</li>';
+  const numberMistakes = Object.entries(state.mistakes).sort(([, a], [, b]) => b - a);
+  const readingMistakes = Object.entries(state.readingMistakes).sort(([, a], [, b]) => b - a);
+  
+  if (numberMistakes.length === 0 && readingMistakes.length === 0) {
+    mistakesList.innerHTML = '<li>No mistakes yet - great job!</li>';
   } else {
-    sortedMistakes.slice(0, 5).forEach(([num, count]) => {
+    mistakesList.innerHTML = '<h4>Numbers needing practice:</h4>';
+    numberMistakes.slice(0, 3).forEach(([num, count]) => {
       const li = document.createElement('li');
       li.textContent = `${num}: ${count} mistakes`;
       mistakesList.appendChild(li);
     });
+    
+    if (readingMistakes.length > 0) {
+      const readingHeader = document.createElement('h4');
+      readingHeader.textContent = 'Reading words needing practice:';
+      mistakesList.appendChild(readingHeader);
+      
+      readingMistakes.slice(0, 3).forEach(([word, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${word}: ${count} mistakes`;
+        mistakesList.appendChild(li);
+      });
+    }
   }
   
   soundToggle.checked = state.sound;
+  hintsToggle.checked = state.hints;
 }
 
 function renderAchievements() {
@@ -969,32 +1456,39 @@ function renderAchievements() {
       const span = document.createElement('span');
       span.textContent = `🏆 ${achievements[key].name}`;
       span.style.margin = '0 5px';
+      span.title = achievements[key].description;
       list.appendChild(span);
     }
   });
 }
 
 function resetGame() {
-  if (confirm("Are you sure you want to reset all your progress?")) {
+  if (confirm("Are you sure you want to reset all progress? This cannot be undone!")) {
     localStorage.removeItem(STORAGE_KEY);
     state = {
+      gameMode: 'mixed',
       difficulty: 1,
       streak: 0,
       mastered: [],
+      readingMastered: [],
       mistakes: {},
+      readingMistakes: {},
       collection: [],
       stolen: [],
       lastQuestion: null,
       correctTotal: 0,
+      readingTotal: 0,
       sound: true,
+      hints: true,
       milestones: [],
       achievementsUnlocked: {},
       eggs: [],
       hatched: [],
-      rocketWins: 0
+      rocketWins: 0,
+      phonicsCompleted: 0
     };
     save();
-    showTempMessage('Progress has been reset!', 2000, 'error');
+    showTempMessage('All progress has been reset!', 2000, 'error');
     showScreen('menu');
   }
 }
@@ -1003,12 +1497,39 @@ function resetGame() {
 window.onload = function() {
   showScreen('menu');
   
+  // Settings
   soundToggle.checked = state.sound;
   soundToggle.addEventListener('change', (e) => {
     state.sound = e.target.checked;
     save();
   });
   
+  hintsToggle.checked = state.hints;
+  hintsToggle.addEventListener('change', (e) => {
+    state.hints = e.target.checked;
+    save();
+  });
+  
+  // Game mode selection
+  document.getElementById('numbersMode').onclick = () => {
+    state.gameMode = 'numbers';
+    updateModeButtons();
+    save();
+  };
+  
+  document.getElementById('readingMode').onclick = () => {
+    state.gameMode = 'reading';
+    updateModeButtons();
+    save();
+  };
+  
+  document.getElementById('mixedMode').onclick = () => {
+    state.gameMode = 'mixed';
+    updateModeButtons();
+    save();
+  };
+  
+  // Navigation
   document.getElementById('playBtn').onclick = startGame;
   document.getElementById('mapBtn').onclick = () => showScreen('map');
   document.getElementById('dexBtn').onclick = () => showScreen('dex');
@@ -1018,19 +1539,51 @@ window.onload = function() {
   document.getElementById('backFromAnalytics').onclick = () => showScreen('menu');
   document.getElementById('quitBtn').onclick = quitToMenu;
   document.getElementById('resetBtn').onclick = resetGame;
+  
+  // Game controls
   document.getElementById('submitBtn').onclick = submitAnswer;
   document.getElementById('answerInput').onkeydown = (e) => {
     if (e.key === 'Enter') submitAnswer();
   };
   document.getElementById('continueBtn').onclick = nextQuestion;
+  document.getElementById('hintBtn').onclick = showHint;
+  
+  // Team Rocket controls
   document.getElementById('forfeitRocket').onclick = () => {
-    showTempMessage('You gave up! Next time!', 2000, 'error');
-    setTimeout(() => showScreen('game'), 500);
+    showTempMessage('You gave up! Team Rocket wins this time!', 2000, 'error');
+    setTimeout(() => {
+      showScreen('game');
+      nextQuestion();
+    }, 1000);
   };
+  
+  // Victory screen
+  document.getElementById('continueFromVictory').onclick = () => {
+    showScreen('game');
+    nextQuestion();
+  };
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' && continueBtn.style.display !== 'none') {
+      e.preventDefault();
+      nextQuestion();
+    }
+    if (e.key === 'h' && hintBtn.style.display !== 'none') {
+      e.preventDefault();
+      showHint();
+    }
+  });
   
   updateCollectionBar();
   renderAchievements();
   renderEggs();
+  updateModeButtons();
   
   gameTimerInterval = setInterval(checkEggs, 1000);
 };
+
+function updateModeButtons() {
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(state.gameMode + 'Mode').classList.add('active');
+}
