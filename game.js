@@ -34,7 +34,47 @@ const achievements = {
   'perfect_session': { name: 'Perfect Session', description: 'Got 20 math problems right without a mistake' }
 };
 
-// Reading word lists for different skill levels
+// Time learning data
+const timeSkills = {
+  hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  minutes: [0, 15, 30, 45],
+  timeWords: ['hour', 'minute', 'clock', 'time', 'morning', 'afternoon', 'evening', 'night'],
+  dailyActivities: [
+    { time: '7:00', activity: 'wake up', period: 'morning' },
+    { time: '8:00', activity: 'eat breakfast', period: 'morning' },
+    { time: '12:00', activity: 'eat lunch', period: 'afternoon' },
+    { time: '3:00', activity: 'snack time', period: 'afternoon' },
+    { time: '6:00', activity: 'eat dinner', period: 'evening' },
+    { time: '8:00', activity: 'bedtime', period: 'night' }
+  ]
+};
+
+// Science and nature content
+const scienceContent = {
+  animals: [
+    { name: 'elephant', habitat: 'savanna', sound: 'trumpet', fact: 'largest land animal' },
+    { name: 'dolphin', habitat: 'ocean', sound: 'click', fact: 'very smart marine mammal' },
+    { name: 'owl', habitat: 'forest', sound: 'hoot', fact: 'hunts at night' },
+    { name: 'frog', habitat: 'pond', sound: 'ribbit', fact: 'starts as a tadpole' },
+    { name: 'bee', habitat: 'hive', sound: 'buzz', fact: 'makes honey' }
+  ],
+  weather: ['sunny', 'rainy', 'cloudy', 'snowy', 'windy', 'stormy'],
+  seasons: ['spring', 'summer', 'fall', 'winter'],
+  plants: ['tree', 'flower', 'grass', 'bush', 'vine']
+};
+
+// Enhanced achievements for new content
+const newAchievements = {
+  'time_master': { name: 'Time Master', description: 'Learned to read 20 different times' },
+  'nature_explorer': { name: 'Nature Explorer', description: 'Identified 15 animals correctly' },
+  'weather_watcher': { name: 'Weather Watcher', description: 'Mastered weather vocabulary' },
+  'daily_scheduler': { name: 'Daily Scheduler', description: 'Matched 10 activities to correct times' },
+  'science_student': { name: 'Science Student', description: 'Completed 25 science questions' },
+  'pattern_detective': { name: 'Pattern Detective', description: 'Solved 15 sequence puzzles' }
+};
+
+// Merge with existing achievements
+Object.assign(achievements, newAchievements);
 const readingWords = {
   simple: ['cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'mat', 'bat', 'sit', 'top', 'hop', 'cup', 'bug', 'fun', 'pig', 'bag', 'leg', 'web', 'pen'],
   medium: ['jump', 'swim', 'play', 'happy', 'truck', 'clock', 'smile', 'green', 'snake', 'bread', 'chair', 'plant', 'beach', 'sheep', 'brown', 'quick', 'earth', 'light'],
@@ -52,25 +92,34 @@ const rhymingPairs = {
   'ball': ['call', 'fall', 'tall', 'wall']
 };
 
-const STORAGE_KEY = 'spelling_numbers_finn_v5';
+const STORAGE_KEY = 'spelling_numbers_finn_v6';
 let state = {
-  gameMode: 'mixed', // 'numbers', 'reading', 'mixed', 'math'
+  gameMode: 'mixed', // 'numbers', 'reading', 'mixed', 'math', 'time', 'science'
   difficulty: 1,
   streak: 0,
   mastered: [],
   readingMastered: [],
   mathMastered: [],
+  timeMastered: [],
+  scienceMastered: [],
   mistakes: {},
   readingMistakes: {},
   mathMistakes: {},
+  timeMistakes: {},
+  scienceMistakes: {},
   collection: [],
   stolen: [],
   lastQuestion: null,
   correctTotal: 0,
   readingTotal: 0,
   mathTotal: 0,
+  timeTotal: 0,
+  scienceTotal: 0,
   sound: true,
   hints: true,
+  speechRate: 0.8,
+  textSize: 'normal', // 'small', 'normal', 'large'
+  colorMode: 'normal', // 'normal', 'high-contrast'
   milestones: [],
   achievementsUnlocked: {},
   eggs: [],
@@ -78,11 +127,17 @@ let state = {
   rocketWins: 0,
   phonicsCompleted: 0,
   // Math difficulty tracking
-  additionLevel: 1,    // 1-5 (1+1 to 99+99)
-  subtractionLevel: 1, // 1-5 (10-1 to 100-50)
+  additionLevel: 1,
+  subtractionLevel: 1,
   mathStreak: 0,
   mathSessionCorrect: 0,
-  mathSessionTotal: 0
+  mathSessionTotal: 0,
+  // New tracking
+  timeLevel: 1,
+  scienceStreak: 0,
+  sessionStartTime: null,
+  dailyGoal: 20,
+  dailyProgress: 0
 };
 
 function load() {
@@ -454,12 +509,18 @@ function nextQuestion() {
     questionTypes = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'];
   } else if (state.gameMode === 'math') {
     questionTypes = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'];
+  } else if (state.gameMode === 'time') {
+    questionTypes = ['timeTelling', 'dailyActivity', 'timeSequence'];
+  } else if (state.gameMode === 'science') {
+    questionTypes = ['animalIdentification', 'animalHabitat', 'weatherPattern'];
   } else { // mixed mode
     const numTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
                       'placeValue', 'nearestTen', 'compare'];
     const readTypes = ['readWord', 'sightWord', 'rhyming', 'phonics'];
     const mathTypes = ['addition', 'subtraction'];
-    questionTypes = [...numTypes, ...readTypes, ...mathTypes];
+    const timeTypes = ['timeTelling', 'dailyActivity'];
+    const scienceTypes = ['animalIdentification', 'weatherPattern'];
+    questionTypes = [...numTypes, ...readTypes, ...mathTypes, ...timeTypes, ...scienceTypes];
   }
   
   const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
@@ -469,8 +530,11 @@ function nextQuestion() {
   if (['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(type)) {
     state.lastQuestion = chooseReadingWord();
   } else if (['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(type)) {
-    // For math questions, we'll store the problem in state.lastQuestion
     state.lastQuestion = type; // Store the type, actual problem generated in show function
+  } else if (['timeTelling', 'dailyActivity', 'timeSequence'].includes(type)) {
+    state.lastQuestion = type; // Time problems generate their own content
+  } else if (['animalIdentification', 'animalHabitat', 'weatherPattern'].includes(type)) {
+    state.lastQuestion = type; // Science problems generate their own content
   } else {
     state.lastQuestion = chooseNumber();
   }
@@ -497,6 +561,12 @@ function nextQuestion() {
   else if (type === 'subtraction') showSubtraction();
   else if (type === 'mathWordProblem') showMathWordProblem();
   else if (type === 'mathComparison') showMathComparison();
+  else if (type === 'timeTelling') showTimeTelling();
+  else if (type === 'dailyActivity') showDailyActivity();
+  else if (type === 'timeSequence') showTimeSequence();
+  else if (type === 'animalIdentification') showAnimalIdentification();
+  else if (type === 'animalHabitat') showAnimalHabitat();
+  else if (type === 'weatherPattern') showWeatherPattern();
 }
 
 // ========== READING QUESTION TYPES ==========
@@ -653,7 +723,180 @@ function showLetterSounds() {
   optEl.appendChild(repeatBtn);
 }
 
-// ========== MATH QUESTION TYPES ==========
+// ========== TIME & SCIENCE QUESTION TYPES ==========
+function showTimeTelling() {
+  const hour = timeSkills.hours[Math.floor(Math.random() * timeSkills.hours.length)];
+  const minute = timeSkills.minutes[Math.floor(Math.random() * timeSkills.minutes.length)];
+  
+  currentAnswer = `${hour}:${minute.toString().padStart(2, '0')}`;
+  state.lastQuestion = currentAnswer;
+  
+  qEl.textContent = `What time does this clock show?`;
+  
+  // Create analog clock display
+  const clockHtml = createAnalogClock(hour, minute);
+  optEl.innerHTML = `<div class="clock-display">${clockHtml}</div>`;
+  
+  speak(`What time does this clock show?`);
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type time like 3:30';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showDailyActivity() {
+  const activity = timeSkills.dailyActivities[Math.floor(Math.random() * timeSkills.dailyActivities.length)];
+  const wrongTimes = timeSkills.dailyActivities.filter(a => a !== activity);
+  const choices = [activity, ...wrongTimes.slice(0, 3)];
+  shuffleArray(choices);
+  
+  currentAnswer = activity.time;
+  state.lastQuestion = activity.activity;
+  
+  qEl.textContent = `What time do most people ${activity.activity}?`;
+  
+  speak(`What time do most people ${activity.activity}?`);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice.time;
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice.time);
+    optEl.appendChild(btn);
+  });
+}
+
+function showTimeSequence() {
+  const baseHour = Math.floor(Math.random() * 8) + 1; // 1-8
+  const sequence = [
+    `${baseHour}:00`,
+    `${baseHour + 1}:00`,
+    `${baseHour + 2}:00`,
+    '___',
+    `${baseHour + 4}:00`
+  ];
+  
+  currentAnswer = `${baseHour + 3}:00`;
+  state.lastQuestion = sequence.join(' ');
+  
+  qEl.textContent = `What time comes next in this pattern?`;
+  optEl.innerHTML = `<div class="time-sequence">${sequence.join(' → ')}</div>`;
+  
+  speak(`What time comes next in this pattern?`);
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type time like 4:00';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showAnimalIdentification() {
+  const animal = scienceContent.animals[Math.floor(Math.random() * scienceContent.animals.length)];
+  const wrongAnimals = scienceContent.animals.filter(a => a !== animal);
+  const choices = [animal.name, ...wrongAnimals.slice(0, 3).map(a => a.name)];
+  shuffleArray(choices);
+  
+  currentAnswer = animal.name;
+  state.lastQuestion = animal.name;
+  
+  qEl.textContent = `Which animal ${animal.fact}?`;
+  
+  speak(`Which animal ${animal.fact}?`);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
+}
+
+function showAnimalHabitat() {
+  const animal = scienceContent.animals[Math.floor(Math.random() * scienceContent.animals.length)];
+  const habitats = ['ocean', 'forest', 'savanna', 'pond', 'hive', 'desert', 'mountains'];
+  const wrongHabitats = habitats.filter(h => h !== animal.habitat);
+  const choices = [animal.habitat, ...wrongHabitats.slice(0, 3)];
+  shuffleArray(choices);
+  
+  currentAnswer = animal.habitat;
+  state.lastQuestion = animal.name;
+  
+  qEl.textContent = `Where does a ${animal.name} live?`;
+  
+  speak(`Where does a ${animal.name} live?`);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
+}
+
+function showWeatherPattern() {
+  const seasons = {
+    'spring': ['rainy', 'mild', 'flowers bloom'],
+    'summer': ['sunny', 'hot', 'long days'],
+    'fall': ['leaves change', 'cooler', 'harvest time'],
+    'winter': ['cold', 'snowy', 'short days']
+  };
+  
+  const season = Object.keys(seasons)[Math.floor(Math.random() * 4)];
+  const correctWeather = seasons[season][Math.floor(Math.random() * seasons[season].length)];
+  const wrongWeathers = [];
+  
+  Object.values(seasons).forEach(weatherList => {
+    weatherList.forEach(weather => {
+      if (weather !== correctWeather && !wrongWeathers.includes(weather)) {
+        wrongWeathers.push(weather);
+      }
+    });
+  });
+  
+  const choices = [correctWeather, ...wrongWeathers.slice(0, 3)];
+  shuffleArray(choices);
+  
+  currentAnswer = correctWeather;
+  state.lastQuestion = season;
+  
+  qEl.textContent = `What is the weather usually like in ${season}?`;
+  
+  speak(`What is the weather usually like in ${season}?`);
+  
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
+}
+
+function createAnalogClock(hour, minute) {
+  const hourAngle = (hour % 12) * 30 + (minute / 60) * 30; // 30 degrees per hour
+  const minuteAngle = minute * 6; // 6 degrees per minute
+  
+  return `
+    <div class="analog-clock">
+      <div class="clock-face">
+        <div class="hour-hand" style="transform: rotate(${hourAngle}deg)"></div>
+        <div class="minute-hand" style="transform: rotate(${minuteAngle}deg)"></div>
+        <div class="clock-center"></div>
+        <div class="hour-marker" style="transform: rotate(0deg)"><span>12</span></div>
+        <div class="hour-marker" style="transform: rotate(90deg)"><span>3</span></div>
+        <div class="hour-marker" style="transform: rotate(180deg)"><span>6</span></div>
+        <div class="hour-marker" style="transform: rotate(270deg)"><span>9</span></div>
+      </div>
+    </div>
+  `;
+}
 function showAddition() {
   const level = getMathDifficultyLevel('addition');
   const problem = generateAdditionProblem(level);
@@ -1232,10 +1475,13 @@ function handleCorrect() {
   if (timeTaken < 2000) unlockAchievement('speed_typist');
   
   state.streak++;
+  state.dailyProgress++;
   
-  // Determine if this was a number, reading, or math question
+  // Determine the question category
   const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
   const isMathQuestion = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(currentQuestionType);
+  const isTimeQuestion = ['timeTelling', 'dailyActivity', 'timeSequence'].includes(currentQuestionType);
+  const isScienceQuestion = ['animalIdentification', 'animalHabitat', 'weatherPattern'].includes(currentQuestionType);
   
   if (isReadingQuestion) {
     state.readingTotal++;
@@ -1267,6 +1513,24 @@ function handleCorrect() {
     if (!state.mathMastered.includes(state.lastQuestion)) {
       state.mathMastered.push(state.lastQuestion);
     }
+  } else if (isTimeQuestion) {
+    state.timeTotal++;
+    if (!state.timeMastered.includes(state.lastQuestion)) {
+      state.timeMastered.push(state.lastQuestion);
+    }
+    if (state.timeTotal >= 20) unlockAchievement('time_master');
+    if (state.timeMastered.length >= 10) unlockAchievement('daily_scheduler');
+  } else if (isScienceQuestion) {
+    state.scienceTotal++;
+    state.scienceStreak++;
+    if (!state.scienceMastered.includes(state.lastQuestion)) {
+      state.scienceMastered.push(state.lastQuestion);
+    }
+    if (state.scienceTotal >= 15) unlockAchievement('nature_explorer');
+    if (state.scienceTotal >= 25) unlockAchievement('science_student');
+    if (currentQuestionType === 'weatherPattern' && state.scienceMastered.filter(q => q.includes('weather')).length >= 5) {
+      unlockAchievement('weather_watcher');
+    }
   } else {
     state.correctTotal++;
     if (!state.mastered.includes(state.lastQuestion)) {
@@ -1279,6 +1543,11 @@ function handleCorrect() {
   if (state.streak >= 20) {
     unlockAchievement('streak_master');
     state.streak = 0;
+  }
+  
+  // Check daily goal
+  if (state.dailyProgress >= state.dailyGoal) {
+    showTempMessage(`🎯 Daily goal achieved! Great job!`, 3000, 'success');
   }
   
   state.lastQuestion = null; // Clear question after correct answer
@@ -1298,7 +1567,7 @@ function handleCorrect() {
   }
   
   // Team Rocket battle every 15 correct answers (combined)
-  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal;
+  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal + state.timeTotal + state.scienceTotal;
   if (totalAnswers > 0 && totalAnswers % 15 === 0) {
     triggerRocketBattle();
     return;
@@ -1867,6 +2136,18 @@ window.onload = function() {
   
   document.getElementById('mathMode').onclick = () => {
     state.gameMode = 'math';
+    updateModeButtons();
+    save();
+  };
+  
+  document.getElementById('timeMode').onclick = () => {
+    state.gameMode = 'time';
+    updateModeButtons();
+    save();
+  };
+  
+  document.getElementById('scienceMode').onclick = () => {
+    state.gameMode = 'science';
     updateModeButtons();
     save();
   };
