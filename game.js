@@ -147,6 +147,15 @@ const readingWords = {
 
 const sightWords = ['the', 'and', 'to', 'a', 'I', 'you', 'it', 'in', 'said', 'for', 'up', 'look', 'is', 'go', 'we'];
 
+const rhymingPairs = {
+  'cat': ['bat', 'hat', 'mat', 'rat'],
+  'dog': ['log', 'fog', 'hog', 'jog'],
+  'sun': ['run', 'fun', 'bun', 'gun'],
+  'tree': ['bee', 'see', 'free', 'knee'],
+  'cake': ['make', 'take', 'lake', 'wake'],
+  'ball': ['call', 'fall', 'tall', 'wall']
+};
+
 const MAX_NUM = 200;
 const numbers = Array.from({length: MAX_NUM}, (_, i) => i + 1);
 
@@ -353,6 +362,7 @@ let lastQuestionStart = Date.now();
 let currentQuestionType = null;
 let gameTimerInterval = null;
 let rocketBattleState = null;
+let selectedLetters = [];
 
 // ========== UTILITY FUNCTIONS ==========
 function save() {
@@ -617,6 +627,33 @@ function chooseReadingWord() {
     for (let i = 0; i < weight; i++) pool.push(word);
   }
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Helper functions for reading questions
+function countSyllables(word) {
+  const vowels = 'aeiouy';
+  let count = 0;
+  let prevIsVowel = false;
+  
+  for (let i = 0; i < word.length; i++) {
+    const isVowel = vowels.includes(word[i].toLowerCase());
+    if (isVowel && !prevIsVowel) count++;
+    prevIsVowel = isVowel;
+  }
+  
+  if (word.endsWith('e')) count--;
+  return Math.max(1, count);
+}
+
+function getLetterSound(letter) {
+  const sounds = {
+    'a': 'ah', 'b': 'buh', 'c': 'kuh', 'd': 'duh', 'e': 'eh',
+    'f': 'fuh', 'g': 'guh', 'h': 'huh', 'i': 'ih', 'j': 'juh',
+    'k': 'kuh', 'l': 'luh', 'm': 'muh', 'n': 'nuh', 'o': 'oh',
+    'p': 'puh', 'q': 'kwuh', 'r': 'ruh', 's': 'sss', 't': 'tuh',
+    'u': 'uh', 'v': 'vuh', 'w': 'wuh', 'x': 'ksss', 'y': 'yuh', 'z': 'zzz'
+  };
+  return sounds[letter] || letter;
 }
 
 // ========== TEAM ROCKET BATTLE SYSTEM ==========
@@ -1132,11 +1169,93 @@ function showMathComparison() {
 // Helper functions for reading questions
 function showSpellTiles(num, word) {
   currentAnswer = word;
-  qEl.textContent = `How do you spell ${num}?`;
-  speak(`How do you spell ${num}?`);
-  inputRow.style.display = 'flex';
-  answerInput.focus();
-  if (state.hints) hintBtn.style.display = 'inline-block';
+  selectedLetters = [];
+  qEl.textContent = `Spell the number: ${num}`;
+  
+  // Get all letters from the word, including spaces and hyphens for proper spelling
+  const letters = word.split('').filter(c => c !== ' ' && c !== '-');
+  const shuffled = [...letters].sort(() => Math.random() - 0.5);
+  
+  // Clear the options area and create the tile interface
+  optEl.innerHTML = '';
+  
+  // Create display area
+  const tileDisplay = document.createElement('div');
+  tileDisplay.className = 'tile-display';
+  tileDisplay.id = 'tileDisplay';
+  tileDisplay.textContent = 'Click letters to spell the word';
+  optEl.appendChild(tileDisplay);
+  
+  // Create tile bank
+  const tileBank = document.createElement('div');
+  tileBank.className = 'tile-bank';
+  tileBank.id = 'tileBank';
+  
+  // Add letter tiles
+  shuffled.forEach((letter, i) => {
+    const tile = document.createElement('button');
+    tile.textContent = letter.toUpperCase();
+    tile.className = 'letter-tile';
+    tile.style.setProperty('--i', i);
+    tile.onclick = () => selectLetter(letter, tile);
+    tileBank.appendChild(tile);
+  });
+  
+  // Add control buttons
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '↺ Clear';
+  clearBtn.className = 'secondary';
+  clearBtn.onclick = clearLetters;
+  tileBank.appendChild(clearBtn);
+  
+  const submitBtn = document.createElement('button');
+  submitBtn.textContent = '✓ Check';
+  submitBtn.onclick = checkSpelling;
+  tileBank.appendChild(submitBtn);
+  
+  optEl.appendChild(tileBank);
+  
+  speak(`Spell the number ${num}`);
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function selectLetter(letter, tile) {
+  selectedLetters.push(letter);
+  tile.disabled = true;
+  tile.style.opacity = '0.3';
+  updateTileDisplay();
+}
+
+function clearLetters() {
+  selectedLetters = [];
+  document.querySelectorAll('.letter-tile').forEach(tile => {
+    tile.disabled = false;
+    tile.style.opacity = '1';
+  });
+  updateTileDisplay();
+}
+
+function updateTileDisplay() {
+  const display = document.getElementById('tileDisplay');
+  if (!display) return;
+  
+  if (selectedLetters.length > 0) {
+    display.textContent = selectedLetters.join('');
+    display.classList.add('has-content');
+  } else {
+    display.textContent = 'Click letters to spell the word';
+    display.classList.remove('has-content');
+  }
+}
+
+function checkSpelling() {
+  const answer = selectedLetters.join('');
+  const correct = currentAnswer.replace(/[\s-]/g, '');
+  if (answer === correct) return handleCorrect();
+  else return handleWrong(currentAnswer);
 }
 
 function showCountForward(num) {
@@ -1364,8 +1483,8 @@ function showPhonics(word) {
 }
 
 function showSyllables(word) {
-  const syllableCount = word.split(/[aeiou]/).length - 1 || 1;
-  currentAnswer = String(Math.max(1, syllableCount));
+  const syllableCount = countSyllables(word);
+  currentAnswer = String(syllableCount);
   
   qEl.textContent = `How many syllables are in "${word}"?`;
   speak(`How many syllables are in ${word}?`);
