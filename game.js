@@ -25,7 +25,13 @@ const achievements = {
   'egg_collector': { name: 'Egg Collector', description: 'Collected 10 eggs' },
   'speed_typist': { name: 'Speed Typist', description: 'Answered in under 2 seconds' },
   'reading_master': { name: 'Reading Master', description: 'Mastered 50 reading questions' },
-  'phonics_pro': { name: 'Phonics Pro', description: 'Completed 25 phonics challenges' }
+  'phonics_pro': { name: 'Phonics Pro', description: 'Completed 25 phonics challenges' },
+  'math_rookie': { name: 'Math Rookie', description: 'Solved 10 math problems' },
+  'addition_expert': { name: 'Addition Expert', description: 'Reached level 5 in addition' },
+  'subtraction_expert': { name: 'Subtraction Expert', description: 'Reached level 5 in subtraction' },
+  'math_master': { name: 'Math Master', description: 'Solved 100 math problems' },
+  'quick_calculator': { name: 'Quick Calculator', description: 'Solved 10 math problems in a row' },
+  'perfect_session': { name: 'Perfect Session', description: 'Got 20 math problems right without a mistake' }
 };
 
 // Reading word lists for different skill levels
@@ -46,20 +52,23 @@ const rhymingPairs = {
   'ball': ['call', 'fall', 'tall', 'wall']
 };
 
-const STORAGE_KEY = 'spelling_numbers_finn_v4';
+const STORAGE_KEY = 'spelling_numbers_finn_v5';
 let state = {
-  gameMode: 'mixed', // 'numbers', 'reading', 'mixed'
+  gameMode: 'mixed', // 'numbers', 'reading', 'mixed', 'math'
   difficulty: 1,
   streak: 0,
   mastered: [],
   readingMastered: [],
+  mathMastered: [],
   mistakes: {},
   readingMistakes: {},
+  mathMistakes: {},
   collection: [],
   stolen: [],
   lastQuestion: null,
   correctTotal: 0,
   readingTotal: 0,
+  mathTotal: 0,
   sound: true,
   hints: true,
   milestones: [],
@@ -67,7 +76,13 @@ let state = {
   eggs: [],
   hatched: [],
   rocketWins: 0,
-  phonicsCompleted: 0
+  phonicsCompleted: 0,
+  // Math difficulty tracking
+  additionLevel: 1,    // 1-5 (1+1 to 99+99)
+  subtractionLevel: 1, // 1-5 (10-1 to 100-50)
+  mathStreak: 0,
+  mathSessionCorrect: 0,
+  mathSessionTotal: 0
 };
 
 function load() {
@@ -92,7 +107,120 @@ function save() {
 
 load();
 
-// ========== HELPER FUNCTIONS ==========
+// ========== MATH SYSTEM ==========
+function getMathDifficultyLevel(type) {
+  if (type === 'addition') return state.additionLevel;
+  if (type === 'subtraction') return state.subtractionLevel;
+  return 1;
+}
+
+function adjustMathDifficulty(type, wasCorrect) {
+  const currentLevel = getMathDifficultyLevel(type);
+  
+  if (wasCorrect) {
+    state.mathStreak++;
+    state.mathSessionCorrect++;
+    
+    // Increase difficulty if they're doing well
+    if (state.mathStreak >= 5 && currentLevel < 5) {
+      if (type === 'addition') {
+        state.additionLevel++;
+        showTempMessage(`🎉 Addition Level ${state.additionLevel} unlocked!`, 2000, 'success');
+        if (state.additionLevel === 5) unlockAchievement('addition_expert');
+      } else if (type === 'subtraction') {
+        state.subtractionLevel++;
+        showTempMessage(`🎉 Subtraction Level ${state.subtractionLevel} unlocked!`, 2000, 'success');
+        if (state.subtractionLevel === 5) unlockAchievement('subtraction_expert');
+      }
+      state.mathStreak = 0; // Reset streak after level up
+    }
+  } else {
+    state.mathStreak = 0;
+    // Don't decrease difficulty immediately, but track mistakes
+  }
+  
+  state.mathSessionTotal++;
+  save();
+}
+
+function generateAdditionProblem(level) {
+  let num1, num2, max;
+  
+  switch(level) {
+    case 1: // 1+1 to 5+5
+      max = 5;
+      num1 = Math.floor(Math.random() * max) + 1;
+      num2 = Math.floor(Math.random() * max) + 1;
+      break;
+    case 2: // 1+1 to 10+10, ensure sum ≤ 20
+      max = 10;
+      num1 = Math.floor(Math.random() * max) + 1;
+      num2 = Math.floor(Math.random() * (20 - num1)) + 1;
+      break;
+    case 3: // 10+10 to 25+25
+      num1 = Math.floor(Math.random() * 16) + 10; // 10-25
+      num2 = Math.floor(Math.random() * 16) + 10; // 10-25
+      break;
+    case 4: // 20+20 to 50+50
+      num1 = Math.floor(Math.random() * 31) + 20; // 20-50
+      num2 = Math.floor(Math.random() * 31) + 20; // 20-50
+      break;
+    case 5: // 25+25 to 99+99
+      num1 = Math.floor(Math.random() * 75) + 25; // 25-99
+      num2 = Math.floor(Math.random() * 75) + 25; // 25-99
+      break;
+    default:
+      num1 = Math.floor(Math.random() * 5) + 1;
+      num2 = Math.floor(Math.random() * 5) + 1;
+  }
+  
+  return { num1, num2, answer: num1 + num2, operation: '+' };
+}
+
+function generateSubtractionProblem(level) {
+  let num1, num2;
+  
+  switch(level) {
+    case 1: // 5-1 to 10-5
+      num1 = Math.floor(Math.random() * 6) + 5; // 5-10
+      num2 = Math.floor(Math.random() * num1) + 1; // 1 to num1
+      break;
+    case 2: // 10-5 to 20-10
+      num1 = Math.floor(Math.random() * 11) + 10; // 10-20
+      num2 = Math.floor(Math.random() * (num1 - 1)) + 1; // 1 to num1-1
+      break;
+    case 3: // 20-10 to 50-25
+      num1 = Math.floor(Math.random() * 31) + 20; // 20-50
+      num2 = Math.floor(Math.random() * (num1 - 10)) + 10; // 10 to num1-10
+      break;
+    case 4: // 50-25 to 75-35
+      num1 = Math.floor(Math.random() * 26) + 50; // 50-75
+      num2 = Math.floor(Math.random() * (num1 - 20)) + 20; // 20 to num1-20
+      break;
+    case 5: // 75-50 to 100-25
+      num1 = Math.floor(Math.random() * 26) + 75; // 75-100
+      num2 = Math.floor(Math.random() * (num1 - 25)) + 25; // 25 to num1-25
+      break;
+    default:
+      num1 = Math.floor(Math.random() * 6) + 5;
+      num2 = Math.floor(Math.random() * num1) + 1;
+  }
+  
+  return { num1, num2, answer: num1 - num2, operation: '-' };
+}
+
+function chooseMathProblemType() {
+  // Choose between addition and subtraction based on current levels
+  const addLevel = state.additionLevel;
+  const subLevel = state.subtractionLevel;
+  
+  // Favor the operation they need more practice with
+  if (addLevel > subLevel + 1) return 'subtraction';
+  if (subLevel > addLevel + 1) return 'addition';
+  
+  // Otherwise random choice
+  return Math.random() < 0.5 ? 'addition' : 'subtraction';
+}
 function numToWords(n) {
   const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
   const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
@@ -228,12 +356,13 @@ let currentQuestionType = null;
 function updateStats() {
   const modeNames = {
     'numbers': 'Numbers Only',
-    'reading': 'Reading Only', 
+    'reading': 'Reading Only',
+    'math': 'Math Only',
     'mixed': 'Mixed Learning'
   };
   difficultyLabel.textContent = modeNames[state.gameMode] || 'Mixed Learning';
   streakLabel.textContent = state.streak;
-  totalLabel.textContent = state.correctTotal + state.readingTotal;
+  totalLabel.textContent = state.correctTotal + state.readingTotal + state.mathTotal;
 }
 
 function startGame() {
@@ -323,19 +452,25 @@ function nextQuestion() {
                      'nearestTen', 'compare', 'orderNumbers', 'findPattern'];
   } else if (state.gameMode === 'reading') {
     questionTypes = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'];
+  } else if (state.gameMode === 'math') {
+    questionTypes = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'];
   } else { // mixed mode
     const numTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
                       'placeValue', 'nearestTen', 'compare'];
     const readTypes = ['readWord', 'sightWord', 'rhyming', 'phonics'];
-    questionTypes = [...numTypes, ...readTypes];
+    const mathTypes = ['addition', 'subtraction'];
+    questionTypes = [...numTypes, ...readTypes, ...mathTypes];
   }
   
   const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
   currentQuestionType = type;
   
-  // Set state.lastQuestion for both number and reading questions
+  // Set state.lastQuestion for all question types
   if (['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(type)) {
     state.lastQuestion = chooseReadingWord();
+  } else if (['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(type)) {
+    // For math questions, we'll store the problem in state.lastQuestion
+    state.lastQuestion = type; // Store the type, actual problem generated in show function
   } else {
     state.lastQuestion = chooseNumber();
   }
@@ -358,6 +493,10 @@ function nextQuestion() {
   else if (type === 'phonics') showPhonics(state.lastQuestion);
   else if (type === 'syllables') showSyllables(state.lastQuestion);
   else if (type === 'letterSounds') showLetterSounds();
+  else if (type === 'addition') showAddition();
+  else if (type === 'subtraction') showSubtraction();
+  else if (type === 'mathWordProblem') showMathWordProblem();
+  else if (type === 'mathComparison') showMathComparison();
 }
 
 // ========== READING QUESTION TYPES ==========
@@ -514,7 +653,128 @@ function showLetterSounds() {
   optEl.appendChild(repeatBtn);
 }
 
-// Helper functions for reading questions
+// ========== MATH QUESTION TYPES ==========
+function showAddition() {
+  const level = getMathDifficultyLevel('addition');
+  const problem = generateAdditionProblem(level);
+  
+  currentAnswer = String(problem.answer);
+  state.lastQuestion = `${problem.num1}+${problem.num2}`;
+  
+  qEl.textContent = `What is ${problem.num1} + ${problem.num2}?`;
+  
+  // Create a visual math display
+  optEl.innerHTML = `<div class="math-display">${problem.num1} + ${problem.num2} = ?</div>`;
+  
+  speak(`What is ${problem.num1} plus ${problem.num2}?`);
+  inputRow.style.display = 'flex';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showSubtraction() {
+  const level = getMathDifficultyLevel('subtraction');
+  const problem = generateSubtractionProblem(level);
+  
+  currentAnswer = String(problem.answer);
+  state.lastQuestion = `${problem.num1}-${problem.num2}`;
+  
+  qEl.textContent = `What is ${problem.num1} - ${problem.num2}?`;
+  
+  // Create a visual math display
+  optEl.innerHTML = `<div class="math-display">${problem.num1} - ${problem.num2} = ?</div>`;
+  
+  speak(`What is ${problem.num1} minus ${problem.num2}?`);
+  inputRow.style.display = 'flex';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showMathWordProblem() {
+  const type = chooseMathProblemType();
+  const level = getMathDifficultyLevel(type);
+  const problem = type === 'addition' ? generateAdditionProblem(level) : generateSubtractionProblem(level);
+  
+  currentAnswer = String(problem.answer);
+  state.lastQuestion = `${problem.num1}${problem.operation}${problem.num2}`;
+  
+  let wordProblem;
+  if (type === 'addition') {
+    const scenarios = [
+      `Sarah has ${problem.num1} apples and gets ${problem.num2} more. How many apples does she have now?`,
+      `There are ${problem.num1} birds in a tree. ${problem.num2} more birds join them. How many birds are there total?`,
+      `Tom collected ${problem.num1} coins and found ${problem.num2} more. How many coins does he have altogether?`,
+      `In the morning, ${problem.num1} students were in class. After lunch, ${problem.num2} more joined. How many students are in class now?`
+    ];
+    wordProblem = scenarios[Math.floor(Math.random() * scenarios.length)];
+  } else {
+    const scenarios = [
+      `Maria had ${problem.num1} stickers but gave away ${problem.num2}. How many stickers does she have left?`,
+      `There were ${problem.num1} cookies in a jar. The family ate ${problem.num2} of them. How many cookies are left?`,
+      `Jake had ${problem.num1} toy cars and lost ${problem.num2} of them. How many toy cars does he have now?`,
+      `A school had ${problem.num1} books. They donated ${problem.num2} books to another school. How many books do they have left?`
+    ];
+    wordProblem = scenarios[Math.floor(Math.random() * scenarios.length)];
+  }
+  
+  qEl.textContent = wordProblem;
+  optEl.innerHTML = `<div class="word-problem-display">${wordProblem}</div>`;
+  
+  speak(wordProblem);
+  inputRow.style.display = 'flex';
+  answerInput.focus();
+  
+  if (state.hints) {
+    hintBtn.style.display = 'inline-block';
+  }
+}
+
+function showMathComparison() {
+  const type = chooseMathProblemType();
+  const level = getMathDifficultyLevel(type);
+  
+  const problem1 = type === 'addition' ? generateAdditionProblem(level) : generateSubtractionProblem(level);
+  const problem2 = type === 'addition' ? generateAdditionProblem(level) : generateSubtractionProblem(level);
+  
+  const result1 = problem1.answer;
+  const result2 = problem2.answer;
+  
+  currentAnswer = result1 > result2 ? '>' : (result1 < result2 ? '<' : '=');
+  state.lastQuestion = `${problem1.num1}${problem1.operation}${problem1.num2} vs ${problem2.num1}${problem2.operation}${problem2.num2}`;
+  
+  qEl.textContent = `Which is greater?`;
+  optEl.innerHTML = `
+    <div class="math-comparison">
+      <div class="math-side">
+        <div class="math-expression">${problem1.num1} ${problem1.operation} ${problem1.num2}</div>
+        <div class="math-result">${result1}</div>
+      </div>
+      <div class="comparison-operator">___</div>
+      <div class="math-side">
+        <div class="math-expression">${problem2.num1} ${problem2.operation} ${problem2.num2}</div>
+        <div class="math-result">${result2}</div>
+      </div>
+    </div>
+  `;
+  
+  speak(`Compare ${result1} and ${result2}`);
+  
+  const symbols = ['>', '<', '='];
+  symbols.forEach((sym, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = sym;
+    btn.className = 'symbol-btn';
+    btn.style.setProperty('--i', i);
+    btn.onclick = () => submitChoice(sym);
+    optEl.appendChild(btn);
+  });
+}
 function countSyllables(word) {
   const vowels = 'aeiouy';
   let count = 0;
@@ -908,6 +1168,22 @@ function showHint() {
     hint = `This is a common word that starts with "${currentAnswer[0]}".`;
   } else if (currentQuestionType === 'phonics') {
     hint = `Listen carefully to each sound and put them together.`;
+  } else if (currentQuestionType === 'addition') {
+    const parts = state.lastQuestion.split('+');
+    const num1 = parseInt(parts[0]);
+    const num2 = parseInt(parts[1]);
+    hint = `Try counting up from ${num1}. Add ${num2} more: ${num1} + 1 = ${num1 + 1}, then keep going!`;
+  } else if (currentQuestionType === 'subtraction') {
+    const parts = state.lastQuestion.split('-');
+    const num1 = parseInt(parts[0]);
+    const num2 = parseInt(parts[1]);
+    hint = `Start with ${num1} and count backwards ${num2} times. Or think: what plus ${num2} equals ${num1}?`;
+  } else if (currentQuestionType === 'mathWordProblem') {
+    if (state.lastQuestion.includes('+')) {
+      hint = `This is an addition problem. Look for words like "more", "total", "altogether", or "join".`;
+    } else {
+      hint = `This is a subtraction problem. Look for words like "left", "gave away", "lost", or "ate".`;
+    }
   } else if (currentQuestionType === 'nearestTen') {
     const n = state.lastQuestion;
     const mod = n % 10;
@@ -957,8 +1233,9 @@ function handleCorrect() {
   
   state.streak++;
   
-  // Determine if this was a number or reading question
+  // Determine if this was a number, reading, or math question
   const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
+  const isMathQuestion = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(currentQuestionType);
   
   if (isReadingQuestion) {
     state.readingTotal++;
@@ -970,6 +1247,26 @@ function handleCorrect() {
       if (state.phonicsCompleted >= 25) unlockAchievement('phonics_pro');
     }
     if (state.readingTotal >= 50) unlockAchievement('reading_master');
+  } else if (isMathQuestion) {
+    state.mathTotal++;
+    
+    // Adjust difficulty based on performance
+    if (['addition', 'subtraction'].includes(currentQuestionType)) {
+      adjustMathDifficulty(currentQuestionType, true);
+    }
+    
+    // Track math achievements
+    if (state.mathTotal === 10) unlockAchievement('math_rookie');
+    if (state.mathTotal >= 100) unlockAchievement('math_master');
+    if (state.mathStreak >= 10) unlockAchievement('quick_calculator');
+    if (state.mathSessionCorrect >= 20 && state.mathSessionTotal === state.mathSessionCorrect) {
+      unlockAchievement('perfect_session');
+    }
+    
+    // Add to math mastered list
+    if (!state.mathMastered.includes(state.lastQuestion)) {
+      state.mathMastered.push(state.lastQuestion);
+    }
   } else {
     state.correctTotal++;
     if (!state.mastered.includes(state.lastQuestion)) {
@@ -1001,7 +1298,8 @@ function handleCorrect() {
   }
   
   // Team Rocket battle every 15 correct answers (combined)
-  if ((state.correctTotal + state.readingTotal) > 0 && (state.correctTotal + state.readingTotal) % 15 === 0) {
+  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal;
+  if (totalAnswers > 0 && totalAnswers % 15 === 0) {
     triggerRocketBattle();
     return;
   }
@@ -1019,11 +1317,21 @@ function handleWrong(correct) {
   state.streak = 0;
   playSound('wrong');
   
-  // Track mistakes for both number and reading questions
+  // Track mistakes for number, reading, and math questions
   const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
+  const isMathQuestion = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(currentQuestionType);
   
   if (isReadingQuestion) {
     state.readingMistakes[state.lastQuestion] = (state.readingMistakes[state.lastQuestion] || 0) + 1;
+  } else if (isMathQuestion) {
+    state.mathMistakes[state.lastQuestion] = (state.mathMistakes[state.lastQuestion] || 0) + 1;
+    
+    // Adjust difficulty based on wrong answer
+    if (['addition', 'subtraction'].includes(currentQuestionType)) {
+      adjustMathDifficulty(currentQuestionType, false);
+    }
+    
+    state.mathSessionTotal++;
   } else {
     state.mistakes[state.lastQuestion] = (state.mistakes[state.lastQuestion] || 0) + 1;
   }
@@ -1411,15 +1719,19 @@ function renderDex() {
 
 function renderAnalytics() {
   const content = document.getElementById('analyticsContent');
-  const totalAnswers = state.correctTotal + state.readingTotal;
+  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal;
   
   content.innerHTML = `
     <h3>Overall Progress</h3>
     <p>Total Correct Answers: <strong>${totalAnswers}</strong></p>
     <p>Number Questions: <strong>${state.correctTotal}</strong></p>
     <p>Reading Questions: <strong>${state.readingTotal}</strong></p>
+    <p>Math Questions: <strong>${state.mathTotal}</strong></p>
     <p>Mastered Numbers: <strong>${state.mastered.length} / ${MAX_NUM}</strong></p>
     <p>Reading Words Mastered: <strong>${state.readingMastered.length}</strong></p>
+    <p>Math Problems Mastered: <strong>${state.mathMastered.length}</strong></p>
+    <p>Addition Level: <strong>${state.additionLevel} / 5</strong></p>
+    <p>Subtraction Level: <strong>${state.subtractionLevel} / 5</strong></p>
     <p>Pokédex Completion: <strong>${state.collection.length} / ${creatures.length}</strong></p>
     <p>Team Rocket Wins: <strong>${state.rocketWins}</strong></p>
     <p>Eggs Collected: <strong>${state.hatched.length + state.eggs.length}</strong></p>
@@ -1432,8 +1744,9 @@ function renderAnalytics() {
   const mistakesList = document.getElementById('mistakesList');
   const numberMistakes = Object.entries(state.mistakes).sort(([, a], [, b]) => b - a);
   const readingMistakes = Object.entries(state.readingMistakes).sort(([, a], [, b]) => b - a);
+  const mathMistakes = Object.entries(state.mathMistakes).sort(([, a], [, b]) => b - a);
   
-  if (numberMistakes.length === 0 && readingMistakes.length === 0) {
+  if (numberMistakes.length === 0 && readingMistakes.length === 0 && mathMistakes.length === 0) {
     mistakesList.innerHTML = '<li>No mistakes yet - great job!</li>';
   } else {
     mistakesList.innerHTML = '<h4>Numbers needing practice:</h4>';
@@ -1451,6 +1764,18 @@ function renderAnalytics() {
       readingMistakes.slice(0, 3).forEach(([word, count]) => {
         const li = document.createElement('li');
         li.textContent = `${word}: ${count} mistakes`;
+        mistakesList.appendChild(li);
+      });
+    }
+    
+    if (mathMistakes.length > 0) {
+      const mathHeader = document.createElement('h4');
+      mathHeader.textContent = 'Math problems needing practice:';
+      mistakesList.appendChild(mathHeader);
+      
+      mathMistakes.slice(0, 3).forEach(([problem, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${problem}: ${count} mistakes`;
         mistakesList.appendChild(li);
       });
     }
@@ -1536,6 +1861,12 @@ window.onload = function() {
   
   document.getElementById('readingMode').onclick = () => {
     state.gameMode = 'reading';
+    updateModeButtons();
+    save();
+  };
+  
+  document.getElementById('mathMode').onclick = () => {
+    state.gameMode = 'math';
     updateModeButtons();
     save();
   };
