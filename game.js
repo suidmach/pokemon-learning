@@ -436,11 +436,26 @@ function startGame() {
 }
 
 function quitToMenu() {
-  // Don't allow quitting during a question - they must answer it
-  if (state.lastQuestion !== null || retryState !== null) {
-    showTempMessage('Please finish this question first!', 2000, 'hint');
-    return;
+  // Force clear any ongoing state
+  state.lastQuestion = null;
+  retryState = null;
+  currentQuestionType = null;
+  
+  // Clear any active intervals
+  if (gameTimerInterval) {
+    clearInterval(gameTimerInterval);
+    gameTimerInterval = null;
   }
+  
+  // Clear the interface
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'small center';
+  encounterArea.innerHTML = '';
+  continueBtn.style.display = 'none';
+  inputRow.style.display = 'none';
+  hintBtn.style.display = 'none';
+  optEl.innerHTML = '';
+  
   save();
   showScreen('menu');
 }
@@ -889,10 +904,10 @@ function createAnalogClock(hour, minute) {
         <div class="hour-hand" style="transform: rotate(${hourAngle}deg)"></div>
         <div class="minute-hand" style="transform: rotate(${minuteAngle}deg)"></div>
         <div class="clock-center"></div>
-        <div class="hour-marker" style="transform: rotate(0deg)"><span>12</span></div>
-        <div class="hour-marker" style="transform: rotate(90deg)"><span>3</span></div>
-        <div class="hour-marker" style="transform: rotate(180deg)"><span>6</span></div>
-        <div class="hour-marker" style="transform: rotate(270deg)"><span>9</span></div>
+        <div class="hour-marker hour-12"><span>12</span></div>
+        <div class="hour-marker hour-3"><span>3</span></div>
+        <div class="hour-marker hour-6"><span>6</span></div>
+        <div class="hour-marker hour-9"><span>9</span></div>
       </div>
     </div>
   `;
