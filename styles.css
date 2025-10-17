@@ -1190,6 +1190,7 @@ input:focus-visible {
   margin-left: 0;
   margin-top: -2px;
   border-radius: 2px;
+  z-index: 2;
 }
 
 .minute-hand {
@@ -1203,6 +1204,7 @@ input:focus-visible {
   margin-left: 0;
   margin-top: -1px;
   border-radius: 1px;
+  z-index: 1;
 }
 
 .clock-center {
@@ -1214,21 +1216,38 @@ input:focus-visible {
   background: var(--primary);
   border-radius: 50%;
   transform: translate(-50%, -50%);
+  z-index: 3;
 }
 
 .hour-marker {
   position: absolute;
-  top: 10px;
-  left: 50%;
-  transform-origin: 50% 90px;
   font-weight: 600;
   font-size: 1.2rem;
   color: var(--text);
 }
 
-.hour-marker span {
-  display: block;
+.hour-12 {
+  top: 15px;
+  left: 50%;
   transform: translateX(-50%);
+}
+
+.hour-3 {
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+}
+
+.hour-6 {
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hour-9 {
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
 }
 
 .time-sequence {
