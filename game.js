@@ -1,100 +1,7 @@
-// ========== DATA & STATE ==========
-const MAX_NUM = 200;
-const numbers = Array.from({length: MAX_NUM}, (_, i) => i + 1);
-
-const pokemonNames = ["Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran♀","Nidorina","Nidoqueen","Nidoran♂","Nidorino","Nidoking","Clefairy","Clefable","Vulpix","Ninetales","Jigglypuff","Wigglytuff","Zubat","Golbat","Oddish","Gloom","Vileplume","Paras","Parasect","Venonat","Venomoth","Diglett","Dugtrio","Meowth","Persian","Psyduck","Golduck","Mankey","Primeape","Growlithe","Arcanine","Poliwag","Poliwhirl","Poliwrath","Abra","Kadabra","Alakazam","Machop","Machoke","Machamp","Bellsprout","Weepinbell","Victreebel","Tentacool","Tentacruel","Geodude","Graveler","Golem","Ponyta","Rapidash","Slowpoke","Slowbro","Magnemite","Magneton","Farfetch'd","Doduo","Dodrio","Seel","Dewgong","Grimer","Muk","Shellder","Cloyster","Gastly","Haunter","Gengar","Onix","Drowzee","Hypno","Krabby","Kingler","Voltorb","Electrode","Exeggcute","Exeggutor","Cubone","Marowak","Hitmonlee","Hitmonchan","Lickitung","Koffing","Weezing","Rhyhorn","Rhydon","Chansey","Tangela","Kangaskhan","Horsea","Seadra","Goldeen","Seaking","Staryu","Starmie","Mr. Mime","Scyther","Jynx","Electabuzz","Magmar","Pinsir","Tauros","Magikarp","Gyarados","Lapras","Ditto","Eevee","Vaporeon","Jolteon","Flareon","Porygon","Omanyte","Omastar","Kabuto","Kabutops","Aerodactyl","Snorlax","Articuno","Zapdos","Moltres","Dratini","Dragonair","Dragonite","Mewtwo","Mew"];
-
-const creatures = pokemonNames.map((name, i) => ({
-  id: `poke${i + 1}`,
-  name,
-  img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i + 1}.png`,
-  index: i + 1
-}));
-
-const LEGENDARIES = new Set([144, 145, 146, 150, 151]);
-const RARES = new Set([25, 131, 142]);
-
-const achievements = {
-  'first_catch': { name: 'First Catch!', description: 'Caught your first Pokémon' },
-  'streak_master': { name: 'Streak Master', description: '20 correct in a row' },
-  'legendary_trainer': { name: 'Legendary Trainer', description: 'Caught a legendary' },
-  'egg_hatcher': { name: 'Egg Hatcher', description: 'Hatched your first egg' },
-  'collector_50': { name: 'Collector', description: 'Caught 50 Pokémon' },
-  'rocket_defeated': { name: 'Rocket Buster', description: 'Beat Team Rocket 5 times' },
-  'dex_complete': { name: 'Pokédex Master', description: 'Filled the entire Pokédex' },
-  'egg_collector': { name: 'Egg Collector', description: 'Collected 10 eggs' },
-  'speed_typist': { name: 'Speed Typist', description: 'Answered in under 2 seconds' },
-  'reading_master': { name: 'Reading Master', description: 'Mastered 50 reading questions' },
-  'phonics_pro': { name: 'Phonics Pro', description: 'Completed 25 phonics challenges' },
-  'math_rookie': { name: 'Math Rookie', description: 'Solved 10 math problems' },
-  'addition_expert': { name: 'Addition Expert', description: 'Reached level 5 in addition' },
-  'subtraction_expert': { name: 'Subtraction Expert', description: 'Reached level 5 in subtraction' },
-  'math_master': { name: 'Math Master', description: 'Solved 100 math problems' },
-  'quick_calculator': { name: 'Quick Calculator', description: 'Solved 10 math problems in a row' },
-  'perfect_session': { name: 'Perfect Session', description: 'Got 20 math problems right without a mistake' }
-};
-
-// Time learning data
-const timeSkills = {
-  hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-  minutes: [0, 15, 30, 45],
-  timeWords: ['hour', 'minute', 'clock', 'time', 'morning', 'afternoon', 'evening', 'night'],
-  dailyActivities: [
-    { time: '7:00', activity: 'wake up', period: 'morning' },
-    { time: '8:00', activity: 'eat breakfast', period: 'morning' },
-    { time: '12:00', activity: 'eat lunch', period: 'afternoon' },
-    { time: '3:00', activity: 'snack time', period: 'afternoon' },
-    { time: '6:00', activity: 'eat dinner', period: 'evening' },
-    { time: '8:00', activity: 'bedtime', period: 'night' }
-  ]
-};
-
-// Science and nature content
-const scienceContent = {
-  animals: [
-    { name: 'elephant', habitat: 'savanna', sound: 'trumpet', fact: 'largest land animal' },
-    { name: 'dolphin', habitat: 'ocean', sound: 'click', fact: 'very smart marine mammal' },
-    { name: 'owl', habitat: 'forest', sound: 'hoot', fact: 'hunts at night' },
-    { name: 'frog', habitat: 'pond', sound: 'ribbit', fact: 'starts as a tadpole' },
-    { name: 'bee', habitat: 'hive', sound: 'buzz', fact: 'makes honey' }
-  ],
-  weather: ['sunny', 'rainy', 'cloudy', 'snowy', 'windy', 'stormy'],
-  seasons: ['spring', 'summer', 'fall', 'winter'],
-  plants: ['tree', 'flower', 'grass', 'bush', 'vine']
-};
-
-// Enhanced achievements for new content
-const newAchievements = {
-  'time_master': { name: 'Time Master', description: 'Learned to read 20 different times' },
-  'nature_explorer': { name: 'Nature Explorer', description: 'Identified 15 animals correctly' },
-  'weather_watcher': { name: 'Weather Watcher', description: 'Mastered weather vocabulary' },
-  'daily_scheduler': { name: 'Daily Scheduler', description: 'Matched 10 activities to correct times' },
-  'science_student': { name: 'Science Student', description: 'Completed 25 science questions' },
-  'pattern_detective': { name: 'Pattern Detective', description: 'Solved 15 sequence puzzles' }
-};
-
-// Merge with existing achievements
-Object.assign(achievements, newAchievements);
-const readingWords = {
-  simple: ['cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'mat', 'bat', 'sit', 'top', 'hop', 'cup', 'bug', 'fun', 'pig', 'bag', 'leg', 'web', 'pen'],
-  medium: ['jump', 'swim', 'play', 'happy', 'truck', 'clock', 'smile', 'green', 'snake', 'bread', 'chair', 'plant', 'beach', 'sheep', 'brown', 'quick', 'earth', 'light'],
-  hard: ['elephant', 'butterfly', 'rainbow', 'adventure', 'beautiful', 'computer', 'dinosaur', 'umbrella', 'basketball', 'chocolate', 'telephone', 'helicopter', 'photograph', 'restaurant']
-};
-
-const sightWords = ['the', 'and', 'to', 'a', 'I', 'you', 'it', 'in', 'said', 'for', 'up', 'look', 'is', 'go', 'we', 'little', 'down', 'can', 'see', 'not', 'one', 'my', 'me', 'big', 'come', 'blue', 'red', 'where', 'jump', 'away', 'here', 'help', 'make', 'yellow', 'two', 'play', 'run', 'find', 'three', 'funny'];
-
-const rhymingPairs = {
-  'cat': ['bat', 'hat', 'mat', 'rat'],
-  'dog': ['log', 'fog', 'hog', 'jog'],
-  'sun': ['run', 'fun', 'bun', 'gun'],
-  'tree': ['bee', 'see', 'free', 'knee'],
-  'cake': ['make', 'take', 'lake', 'wake'],
-  'ball': ['call', 'fall', 'tall', 'wall']
-};
-
-const STORAGE_KEY = 'spelling_numbers_finn_v6';
+const STORAGE_KEY = 'spelling_numbers_finn_v7';
 let state = {
   gameMode: 'mixed', // 'numbers', 'reading', 'mixed', 'math', 'time', 'science'
+  gradeLevel: 1, // 1-6 corresponding to grades 1-6
   difficulty: 1,
   streak: 0,
   mastered: [],
@@ -140,27 +47,407 @@ let state = {
   dailyProgress: 0
 };
 
-function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const loaded = JSON.parse(raw);
-      state = { ...state, ...loaded };
-    }
-  } catch (e) {
-    console.warn('Error loading save data:', e);
+// Grade-level content definitions
+const gradeLevelContent = {
+  1: { // Grade 1 (ages 6-7)
+    numbers: { min: 1, max: 20 },
+    addition: { max1: 10, max2: 10, maxSum: 20 },
+    subtraction: { minStart: 5, maxStart: 20, maxSub: 10 },
+    readingWords: ['cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'mat', 'bat', 'sit'],
+    sightWords: ['the', 'and', 'to', 'a', 'I', 'you', 'it', 'in', 'said', 'for'],
+    timeSkills: ['hour', 'o\'clock', 'morning', 'night'],
+    scienceTopics: ['animals', 'weather']
+  },
+  2: { // Grade 2 (ages 7-8)
+    numbers: { min: 1, max: 50 },
+    addition: { max1: 25, max2: 25, maxSum: 50 },
+    subtraction: { minStart: 10, maxStart: 50, maxSub: 25 },
+    readingWords: ['jump', 'swim', 'play', 'happy', 'truck', 'clock', 'smile', 'green', 'snake', 'bread'],
+    sightWords: ['up', 'look', 'is', 'go', 'we', 'little', 'down', 'can', 'see', 'not'],
+    timeSkills: ['half past', 'quarter past', 'minutes'],
+    scienceTopics: ['animals', 'weather', 'seasons']
+  },
+  3: { // Grade 3 (ages 8-9)
+    numbers: { min: 1, max: 100 },
+    addition: { max1: 50, max2: 50, maxSum: 100 },
+    subtraction: { minStart: 20, maxStart: 100, maxSub: 50 },
+    readingWords: ['chair', 'plant', 'beach', 'sheep', 'brown', 'quick', 'earth', 'light', 'friend', 'school'],
+    sightWords: ['one', 'my', 'me', 'big', 'come', 'blue', 'red', 'where', 'jump', 'away'],
+    timeSkills: ['digital time', 'elapsed time', 'schedule'],
+    scienceTopics: ['animals', 'weather', 'seasons', 'habitats']
+  },
+  4: { // Grade 4 (ages 9-10)
+    numbers: { min: 1, max: 150 },
+    addition: { max1: 75, max2: 75, maxSum: 150 },
+    subtraction: { minStart: 30, maxStart: 150, maxSub: 75 },
+    readingWords: ['elephant', 'butterfly', 'rainbow', 'adventure', 'beautiful', 'computer', 'telephone', 'important'],
+    sightWords: ['here', 'help', 'make', 'yellow', 'two', 'play', 'run', 'find', 'three', 'funny'],
+    timeSkills: ['time zones', 'calendar', 'duration'],
+    scienceTopics: ['animals', 'weather', 'seasons', 'habitats', 'life cycles']
+  },
+  5: { // Grade 5 (ages 10-11)
+    numbers: { min: 1, max: 200 },
+    addition: { max1: 99, max2: 99, maxSum: 200 },
+    subtraction: { minStart: 50, maxStart: 200, maxSub: 99 },
+    readingWords: ['dinosaur', 'umbrella', 'basketball', 'chocolate', 'helicopter', 'photograph', 'restaurant', 'community'],
+    sightWords: ['because', 'through', 'before', 'around', 'another', 'between', 'different', 'important'],
+    timeSkills: ['time conversion', 'time problems', 'schedules'],
+    scienceTopics: ['animals', 'weather', 'seasons', 'habitats', 'life cycles', 'simple machines']
+  },
+  6: { // Grade 6 (ages 11-12)
+    numbers: { min: 1, max: 200 },
+    addition: { max1: 99, max2: 99, maxSum: 200 },
+    subtraction: { minStart: 50, maxStart: 200, maxSub: 99 },
+    readingWords: ['magnificent', 'extraordinary', 'encyclopedia', 'responsibility', 'environment', 'opportunity', 'understanding', 'imagination'],
+    sightWords: ['although', 'however', 'therefore', 'meanwhile', 'especially', 'immediately', 'throughout', 'particular'],
+    timeSkills: ['complex schedules', 'time calculations', 'world time'],
+    scienceTopics: ['animals', 'weather', 'seasons', 'habitats', 'life cycles', 'simple machines', 'solar system']
   }
+};
+
+function getGradeContent() {
+  return gradeLevelContent[state.gradeLevel] || gradeLevelContent[1];
 }
 
+// Time learning data
+const timeSkills = {
+  hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  minutes: [0, 15, 30, 45],
+  timeWords: ['hour', 'minute', 'clock', 'time', 'morning', 'afternoon', 'evening', 'night'],
+  dailyActivities: [
+    { time: '7:00', activity: 'wake up', period: 'morning' },
+    { time: '8:00', activity: 'eat breakfast', period: 'morning' },
+    { time: '12:00', activity: 'eat lunch', period: 'afternoon' },
+    { time: '3:00', activity: 'snack time', period: 'afternoon' },
+    { time: '6:00', activity: 'eat dinner', period: 'evening' },
+    { time: '8:00', activity: 'bedtime', period: 'night' }
+  ]
+};
+
+// Science and nature content
+const scienceContent = {
+  animals: [
+    { name: 'elephant', habitat: 'savanna', sound: 'trumpet', fact: 'largest land animal' },
+    { name: 'dolphin', habitat: 'ocean', sound: 'click', fact: 'very smart marine mammal' },
+    { name: 'owl', habitat: 'forest', sound: 'hoot', fact: 'hunts at night' },
+    { name: 'frog', habitat: 'pond', sound: 'ribbit', fact: 'starts as a tadpole' },
+    { name: 'bee', habitat: 'hive', sound: 'buzz', fact: 'makes honey' }
+  ],
+  weather: ['sunny', 'rainy', 'cloudy', 'snowy', 'windy', 'stormy'],
+  seasons: ['spring', 'summer', 'fall', 'winter'],
+  plants: ['tree', 'flower', 'grass', 'bush', 'vine']
+};
+
+// Reading word lists for different skill levels
+const readingWords = {
+  simple: ['cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'mat', 'bat', 'sit'],
+  medium: ['jump', 'swim', 'play', 'happy', 'truck', 'clock', 'smile', 'green', 'snake', 'bread'],
+  hard: ['chair', 'plant', 'beach', 'sheep', 'brown', 'quick', 'earth', 'light', 'friend', 'school']
+};
+
+const sightWords = ['the', 'and', 'to', 'a', 'I', 'you', 'it', 'in', 'said', 'for', 'up', 'look', 'is', 'go', 'we'];
+
+const MAX_NUM = 200;
+const numbers = Array.from({length: MAX_NUM}, (_, i) => i + 1);
+
+// Enhanced achievements for new content
+const achievements = {
+  'first_catch': { name: 'First Catch!', description: 'Caught your first Pokémon' },
+  'streak_master': { name: 'Streak Master', description: '20 correct in a row' },
+  'legendary_trainer': { name: 'Legendary Trainer', description: 'Caught a legendary' },
+  'egg_hatcher': { name: 'Egg Hatcher', description: 'Hatched your first egg' },
+  'collector_50': { name: 'Collector', description: 'Caught 50 Pokémon' },
+  'rocket_defeated': { name: 'Rocket Buster', description: 'Beat Team Rocket 5 times' },
+  'dex_complete': { name: 'Pokédex Master', description: 'Filled the entire Pokédex' },
+  'egg_collector': { name: 'Egg Collector', description: 'Collected 10 eggs' },
+  'speed_typist': { name: 'Speed Typist', description: 'Answered in under 2 seconds' },
+  'reading_master': { name: 'Reading Master', description: 'Mastered 50 reading questions' },
+  'phonics_pro': { name: 'Phonics Pro', description: 'Completed 25 phonics challenges' },
+  'math_rookie': { name: 'Math Rookie', description: 'Solved 10 math problems' },
+  'addition_expert': { name: 'Addition Expert', description: 'Reached level 5 in addition' },
+  'subtraction_expert': { name: 'Subtraction Expert', description: 'Reached level 5 in subtraction' },
+  'math_master': { name: 'Math Master', description: 'Solved 100 math problems' },
+  'quick_calculator': { name: 'Quick Calculator', description: 'Solved 10 math problems in a row' },
+  'perfect_session': { name: 'Perfect Session', description: 'Got 20 math problems right without a mistake' },
+  'time_master': { name: 'Time Master', description: 'Learned to read 20 different times' },
+  'nature_explorer': { name: 'Nature Explorer', description: 'Identified 15 animals correctly' },
+  'weather_watcher': { name: 'Weather Watcher', description: 'Mastered weather vocabulary' },
+  'daily_scheduler': { name: 'Daily Scheduler', description: 'Matched 10 activities to correct times' },
+  'science_student': { name: 'Science Student', description: 'Completed 25 science questions' },
+  'pattern_detective': { name: 'Pattern Detective', description: 'Solved 15 sequence puzzles' }
+};
+
+// Pokémon database with detailed information - Complete 151 Pokemon
+const creatures = [
+  { name: 'Bulbasaur', rarity: 'common', type: 'Grass', emoji: '🌱', description: 'A grass seed Pokémon' },
+  { name: 'Ivysaur', rarity: 'uncommon', type: 'Grass', emoji: '🌿', description: 'An evolved grass Pokémon' },
+  { name: 'Venusaur', rarity: 'rare', type: 'Grass', emoji: '🌺', description: 'A flower Pokémon with a large bloom' },
+  { name: 'Charmander', rarity: 'common', type: 'Fire', emoji: '🔥', description: 'A fire lizard Pokémon' },
+  { name: 'Charmeleon', rarity: 'uncommon', type: 'Fire', emoji: '🔥', description: 'A flame Pokémon' },
+  { name: 'Charizard', rarity: 'rare', type: 'Fire', emoji: '🐲', description: 'A powerful fire dragon' },
+  { name: 'Squirtle', rarity: 'common', type: 'Water', emoji: '🐢', description: 'A tiny turtle Pokémon' },
+  { name: 'Wartortle', rarity: 'uncommon', type: 'Water', emoji: '🐢', description: 'A turtle Pokémon' },
+  { name: 'Blastoise', rarity: 'rare', type: 'Water', emoji: '🌊', description: 'A water turtle with cannons' },
+  { name: 'Caterpie', rarity: 'common', type: 'Bug', emoji: '🐛', description: 'A worm Pokémon' },
+  { name: 'Metapod', rarity: 'common', type: 'Bug', emoji: '🛡️', description: 'A cocoon Pokémon' },
+  { name: 'Butterfree', rarity: 'uncommon', type: 'Bug', emoji: '🦋', description: 'A butterfly Pokémon' },
+  { name: 'Weedle', rarity: 'common', type: 'Bug', emoji: '🐛', description: 'A hairy bug Pokémon' },
+  { name: 'Kakuna', rarity: 'common', type: 'Bug', emoji: '🛡️', description: 'A cocoon Pokémon' },
+  { name: 'Beedrill', rarity: 'uncommon', type: 'Bug', emoji: '🐝', description: 'A poison bee Pokémon' },
+  { name: 'Pidgey', rarity: 'common', type: 'Normal', emoji: '🐦', description: 'A tiny bird Pokémon' },
+  { name: 'Pidgeotto', rarity: 'uncommon', type: 'Normal', emoji: '🦅', description: 'A bird Pokémon' },
+  { name: 'Pidgeot', rarity: 'rare', type: 'Normal', emoji: '🦅', description: 'A bird of prey Pokémon' },
+  { name: 'Rattata', rarity: 'common', type: 'Normal', emoji: '🐭', description: 'A rat Pokémon' },
+  { name: 'Raticate', rarity: 'uncommon', type: 'Normal', emoji: '🐭', description: 'A rat Pokémon with big teeth' },
+  { name: 'Spearow', rarity: 'common', type: 'Normal', emoji: '🐦', description: 'A tiny bird Pokémon' },
+  { name: 'Fearow', rarity: 'uncommon', type: 'Normal', emoji: '🦅', description: 'A beak Pokémon' },
+  { name: 'Ekans', rarity: 'common', type: 'Poison', emoji: '🐍', description: 'A snake Pokémon' },
+  { name: 'Arbok', rarity: 'uncommon', type: 'Poison', emoji: '🐍', description: 'A cobra Pokémon' },
+  { name: 'Pikachu', rarity: 'uncommon', type: 'Electric', emoji: '⚡', description: 'A friendly electric mouse' },
+  { name: 'Raichu', rarity: 'rare', type: 'Electric', emoji: '⚡', description: 'A mouse Pokémon with electric cheeks' },
+  { name: 'Sandshrew', rarity: 'common', type: 'Ground', emoji: '🏔️', description: 'A mouse Pokémon' },
+  { name: 'Sandslash', rarity: 'uncommon', type: 'Ground', emoji: '🏔️', description: 'A mouse Pokémon with sharp claws' },
+  { name: 'Nidoran♀', rarity: 'common', type: 'Poison', emoji: '💜', description: 'A poison pin Pokémon' },
+  { name: 'Nidorina', rarity: 'uncommon', type: 'Poison', emoji: '💜', description: 'A poison pin Pokémon' },
+  { name: 'Nidoqueen', rarity: 'rare', type: 'Poison', emoji: '💜', description: 'A drill Pokémon' },
+  { name: 'Nidoran♂', rarity: 'common', type: 'Poison', emoji: '💙', description: 'A poison pin Pokémon' },
+  { name: 'Nidorino', rarity: 'uncommon', type: 'Poison', emoji: '💙', description: 'A poison pin Pokémon' },
+  { name: 'Nidoking', rarity: 'rare', type: 'Poison', emoji: '💙', description: 'A drill Pokémon' },
+  { name: 'Clefairy', rarity: 'uncommon', type: 'Fairy', emoji: '🌙', description: 'A fairy Pokémon' },
+  { name: 'Clefable', rarity: 'rare', type: 'Fairy', emoji: '🌙', description: 'A fairy Pokémon' },
+  { name: 'Vulpix', rarity: 'uncommon', type: 'Fire', emoji: '🦊', description: 'A fox Pokémon' },
+  { name: 'Ninetales', rarity: 'rare', type: 'Fire', emoji: '🦊', description: 'A fox Pokémon with nine tails' },
+  { name: 'Jigglypuff', rarity: 'uncommon', type: 'Normal', emoji: '🎵', description: 'A balloon Pokémon' },
+  { name: 'Wigglytuff', rarity: 'rare', type: 'Normal', emoji: '🎵', description: 'A balloon Pokémon' },
+  { name: 'Zubat', rarity: 'common', type: 'Poison', emoji: '🦇', description: 'A bat Pokémon' },
+  { name: 'Golbat', rarity: 'uncommon', type: 'Poison', emoji: '🦇', description: 'A bat Pokémon' },
+  { name: 'Oddish', rarity: 'common', type: 'Grass', emoji: '🌿', description: 'A weed Pokémon' },
+  { name: 'Gloom', rarity: 'uncommon', type: 'Grass', emoji: '🌿', description: 'A weed Pokémon' },
+  { name: 'Vileplume', rarity: 'rare', type: 'Grass', emoji: '🌺', description: 'A flower Pokémon' },
+  { name: 'Paras', rarity: 'common', type: 'Bug', emoji: '🍄', description: 'A mushroom Pokémon' },
+  { name: 'Parasect', rarity: 'uncommon', type: 'Bug', emoji: '🍄', description: 'A mushroom Pokémon' },
+  { name: 'Venonat', rarity: 'common', type: 'Bug', emoji: '🐛', description: 'An insect Pokémon' },
+  { name: 'Venomoth', rarity: 'uncommon', type: 'Bug', emoji: '🦋', description: 'A poison moth Pokémon' },
+  { name: 'Diglett', rarity: 'common', type: 'Ground', emoji: '🕳️', description: 'A mole Pokémon' },
+  { name: 'Dugtrio', rarity: 'uncommon', type: 'Ground', emoji: '🕳️', description: 'A mole Pokémon' },
+  { name: 'Meowth', rarity: 'uncommon', type: 'Normal', emoji: '🐱', description: 'A scratch cat Pokémon' },
+  { name: 'Persian', rarity: 'rare', type: 'Normal', emoji: '🐱', description: 'A classy cat Pokémon' },
+  { name: 'Psyduck', rarity: 'common', type: 'Water', emoji: '🦆', description: 'A duck Pokémon' },
+  { name: 'Golduck', rarity: 'uncommon', type: 'Water', emoji: '🦆', description: 'A duck Pokémon' },
+  { name: 'Mankey', rarity: 'common', type: 'Fighting', emoji: '🐒', description: 'A pig monkey Pokémon' },
+  { name: 'Primeape', rarity: 'uncommon', type: 'Fighting', emoji: '🐒', description: 'A pig monkey Pokémon' },
+  { name: 'Growlithe', rarity: 'uncommon', type: 'Fire', emoji: '🐕', description: 'A puppy Pokémon' },
+  { name: 'Arcanine', rarity: 'rare', type: 'Fire', emoji: '🐕', description: 'A legendary Pokémon' },
+  { name: 'Poliwag', rarity: 'common', type: 'Water', emoji: '🐸', description: 'A tadpole Pokémon' },
+  { name: 'Poliwhirl', rarity: 'uncommon', type: 'Water', emoji: '🐸', description: 'A tadpole Pokémon' },
+  { name: 'Poliwrath', rarity: 'rare', type: 'Water', emoji: '🐸', description: 'A tadpole Pokémon' },
+  { name: 'Abra', rarity: 'uncommon', type: 'Psychic', emoji: '🔮', description: 'A psi Pokémon' },
+  { name: 'Kadabra', rarity: 'rare', type: 'Psychic', emoji: '🔮', description: 'A psi Pokémon' },
+  { name: 'Alakazam', rarity: 'rare', type: 'Psychic', emoji: '🔮', description: 'A psi Pokémon' },
+  { name: 'Machop', rarity: 'common', type: 'Fighting', emoji: '💪', description: 'A superpower Pokémon' },
+  { name: 'Machoke', rarity: 'uncommon', type: 'Fighting', emoji: '💪', description: 'A superpower Pokémon' },
+  { name: 'Machamp', rarity: 'rare', type: 'Fighting', emoji: '💪', description: 'A four-armed fighter' },
+  { name: 'Bellsprout', rarity: 'common', type: 'Grass', emoji: '🌱', description: 'A flower Pokémon' },
+  { name: 'Weepinbell', rarity: 'uncommon', type: 'Grass', emoji: '🌱', description: 'A flycatcher Pokémon' },
+  { name: 'Victreebel', rarity: 'rare', type: 'Grass', emoji: '🌱', description: 'A flycatcher Pokémon' },
+  { name: 'Tentacool', rarity: 'common', type: 'Water', emoji: '🪼', description: 'A jellyfish Pokémon' },
+  { name: 'Tentacruel', rarity: 'uncommon', type: 'Water', emoji: '🪼', description: 'A jellyfish Pokémon' },
+  { name: 'Geodude', rarity: 'common', type: 'Rock', emoji: '🪨', description: 'A rock Pokémon' },
+  { name: 'Graveler', rarity: 'uncommon', type: 'Rock', emoji: '🪨', description: 'A rock Pokémon' },
+  { name: 'Golem', rarity: 'rare', type: 'Rock', emoji: '🪨', description: 'A megaton Pokémon' },
+  { name: 'Ponyta', rarity: 'uncommon', type: 'Fire', emoji: '🐎', description: 'A fire horse Pokémon' },
+  { name: 'Rapidash', rarity: 'rare', type: 'Fire', emoji: '🐎', description: 'A fire horse Pokémon' },
+  { name: 'Slowpoke', rarity: 'common', type: 'Water', emoji: '🦥', description: 'A dopey Pokémon' },
+  { name: 'Slowbro', rarity: 'uncommon', type: 'Water', emoji: '🦥', description: 'A hermit crab Pokémon' },
+  { name: 'Magnemite', rarity: 'common', type: 'Electric', emoji: '🧲', description: 'A magnet Pokémon' },
+  { name: 'Magneton', rarity: 'uncommon', type: 'Electric', emoji: '🧲', description: 'A magnet Pokémon' },
+  { name: 'Farfetch\'d', rarity: 'rare', type: 'Normal', emoji: '🦆', description: 'A wild duck Pokémon' },
+  { name: 'Doduo', rarity: 'common', type: 'Normal', emoji: '🦆', description: 'A twin bird Pokémon' },
+  { name: 'Dodrio', rarity: 'uncommon', type: 'Normal', emoji: '🦆', description: 'A triple bird Pokémon' },
+  { name: 'Seel', rarity: 'common', type: 'Water', emoji: '🦭', description: 'A sea lion Pokémon' },
+  { name: 'Dewgong', rarity: 'uncommon', type: 'Water', emoji: '🦭', description: 'A sea lion Pokémon' },
+  { name: 'Grimer', rarity: 'common', type: 'Poison', emoji: '💜', description: 'A sludge Pokémon' },
+  { name: 'Muk', rarity: 'uncommon', type: 'Poison', emoji: '💜', description: 'A sludge Pokémon' },
+  { name: 'Shellder', rarity: 'common', type: 'Water', emoji: '🐚', description: 'A bivalve Pokémon' },
+  { name: 'Cloyster', rarity: 'uncommon', type: 'Water', emoji: '🐚', description: 'A bivalve Pokémon' },
+  { name: 'Gastly', rarity: 'uncommon', type: 'Ghost', emoji: '👻', description: 'A gas Pokémon' },
+  { name: 'Haunter', rarity: 'rare', type: 'Ghost', emoji: '👻', description: 'A gas Pokémon' },
+  { name: 'Gengar', rarity: 'rare', type: 'Ghost', emoji: '👻', description: 'A shadow Pokémon' },
+  { name: 'Onix', rarity: 'rare', type: 'Rock', emoji: '🪨', description: 'A rock snake Pokémon' },
+  { name: 'Drowzee', rarity: 'common', type: 'Psychic', emoji: '😴', description: 'A hypnosis Pokémon' },
+  { name: 'Hypno', rarity: 'uncommon', type: 'Psychic', emoji: '😵‍💫', description: 'A hypnosis Pokémon' },
+  { name: 'Krabby', rarity: 'common', type: 'Water', emoji: '🦀', description: 'A river crab Pokémon' },
+  { name: 'Kingler', rarity: 'uncommon', type: 'Water', emoji: '🦀', description: 'A pincer Pokémon' },
+  { name: 'Voltorb', rarity: 'common', type: 'Electric', emoji: '⚡', description: 'A ball Pokémon' },
+  { name: 'Electrode', rarity: 'uncommon', type: 'Electric', emoji: '⚡', description: 'A ball Pokémon' },
+  { name: 'Exeggcute', rarity: 'common', type: 'Grass', emoji: '🥚', description: 'An egg Pokémon' },
+  { name: 'Exeggutor', rarity: 'uncommon', type: 'Grass', emoji: '🥥', description: 'A coconut Pokémon' },
+  { name: 'Cubone', rarity: 'uncommon', type: 'Ground', emoji: '🦴', description: 'A lonely Pokémon' },
+  { name: 'Marowak', rarity: 'rare', type: 'Ground', emoji: '🦴', description: 'A bone keeper Pokémon' },
+  { name: 'Hitmonlee', rarity: 'rare', type: 'Fighting', emoji: '🦵', description: 'A kicking Pokémon' },
+  { name: 'Hitmonchan', rarity: 'rare', type: 'Fighting', emoji: '👊', description: 'A punching Pokémon' },
+  { name: 'Lickitung', rarity: 'rare', type: 'Normal', emoji: '👅', description: 'A licking Pokémon' },
+  { name: 'Koffing', rarity: 'common', type: 'Poison', emoji: '☁️', description: 'A poison gas Pokémon' },
+  { name: 'Weezing', rarity: 'uncommon', type: 'Poison', emoji: '☁️', description: 'A poison gas Pokémon' },
+  { name: 'Rhyhorn', rarity: 'uncommon', type: 'Ground', emoji: '🦏', description: 'A spikes Pokémon' },
+  { name: 'Rhydon', rarity: 'rare', type: 'Ground', emoji: '🦏', description: 'A drill Pokémon' },
+  { name: 'Chansey', rarity: 'rare', type: 'Normal', emoji: '🥚', description: 'An egg Pokémon' },
+  { name: 'Tangela', rarity: 'uncommon', type: 'Grass', emoji: '🪴', description: 'A vine Pokémon' },
+  { name: 'Kangaskhan', rarity: 'rare', type: 'Normal', emoji: '🦘', description: 'A parent Pokémon' },
+  { name: 'Horsea', rarity: 'common', type: 'Water', emoji: '🐉', description: 'A dragon Pokémon' },
+  { name: 'Seadra', rarity: 'uncommon', type: 'Water', emoji: '🐉', description: 'A dragon Pokémon' },
+  { name: 'Goldeen', rarity: 'common', type: 'Water', emoji: '🐠', description: 'A goldfish Pokémon' },
+  { name: 'Seaking', rarity: 'uncommon', type: 'Water', emoji: '🐠', description: 'A goldfish Pokémon' },
+  { name: 'Staryu', rarity: 'common', type: 'Water', emoji: '⭐', description: 'A starshape Pokémon' },
+  { name: 'Starmie', rarity: 'uncommon', type: 'Water', emoji: '⭐', description: 'A mysterious Pokémon' },
+  { name: 'Mr. Mime', rarity: 'rare', type: 'Psychic', emoji: '🎭', description: 'A barrier Pokémon' },
+  { name: 'Scyther', rarity: 'rare', type: 'Bug', emoji: '🦗', description: 'A mantis Pokémon' },
+  { name: 'Jynx', rarity: 'rare', type: 'Ice', emoji: '❄️', description: 'A human shape Pokémon' },
+  { name: 'Electabuzz', rarity: 'rare', type: 'Electric', emoji: '⚡', description: 'An electric Pokémon' },
+  { name: 'Magmar', rarity: 'rare', type: 'Fire', emoji: '🔥', description: 'A spitfire Pokémon' },
+  { name: 'Pinsir', rarity: 'rare', type: 'Bug', emoji: '🦗', description: 'A stag beetle Pokémon' },
+  { name: 'Tauros', rarity: 'rare', type: 'Normal', emoji: '🐂', description: 'A wild bull Pokémon' },
+  { name: 'Magikarp', rarity: 'common', type: 'Water', emoji: '🐟', description: 'A fish Pokémon' },
+  { name: 'Gyarados', rarity: 'legendary', type: 'Water', emoji: '🐉', description: 'An atrocious Pokémon' },
+  { name: 'Lapras', rarity: 'legendary', type: 'Water', emoji: '🌊', description: 'A transport Pokémon' },
+  { name: 'Ditto', rarity: 'rare', type: 'Normal', emoji: '🧬', description: 'A transform Pokémon' },
+  { name: 'Eevee', rarity: 'rare', type: 'Normal', emoji: '🦊', description: 'An evolution Pokémon' },
+  { name: 'Vaporeon', rarity: 'rare', type: 'Water', emoji: '🌊', description: 'A bubble jet Pokémon' },
+  { name: 'Jolteon', rarity: 'rare', type: 'Electric', emoji: '⚡', description: 'A lightning Pokémon' },
+  { name: 'Flareon', rarity: 'rare', type: 'Fire', emoji: '🔥', description: 'A flame Pokémon' },
+  { name: 'Porygon', rarity: 'legendary', type: 'Normal', emoji: '🤖', description: 'A virtual Pokémon' },
+  { name: 'Omanyte', rarity: 'rare', type: 'Rock', emoji: '🐚', description: 'A spiral Pokémon' },
+  { name: 'Omastar', rarity: 'rare', type: 'Rock', emoji: '🐙', description: 'A spiral Pokémon' },
+  { name: 'Kabuto', rarity: 'rare', type: 'Rock', emoji: '🦀', description: 'A shellfish Pokémon' },
+  { name: 'Kabutops', rarity: 'rare', type: 'Rock', emoji: '🦂', description: 'A shellfish Pokémon' },
+  { name: 'Aerodactyl', rarity: 'legendary', type: 'Rock', emoji: '🦅', description: 'A fossil Pokémon' },
+  { name: 'Snorlax', rarity: 'legendary', type: 'Normal', emoji: '😴', description: 'A sleeping Pokémon' },
+  { name: 'Articuno', rarity: 'legendary', type: 'Ice', emoji: '🧊', description: 'A freeze Pokémon' },
+  { name: 'Zapdos', rarity: 'legendary', type: 'Electric', emoji: '⚡', description: 'An electric Pokémon' },
+  { name: 'Moltres', rarity: 'legendary', type: 'Fire', emoji: '🔥', description: 'A flame Pokémon' },
+  { name: 'Dratini', rarity: 'rare', type: 'Dragon', emoji: '🐍', description: 'A dragon Pokémon' },
+  { name: 'Dragonair', rarity: 'rare', type: 'Dragon', emoji: '🐉', description: 'A dragon Pokémon' },
+  { name: 'Dragonite', rarity: 'legendary', type: 'Dragon', emoji: '🐲', description: 'A dragon Pokémon' },
+  { name: 'Mewtwo', rarity: 'legendary', type: 'Psychic', emoji: '🧠', description: 'A genetic Pokémon' },
+  { name: 'Mew', rarity: 'legendary', type: 'Psychic', emoji: '💫', description: 'A new species Pokémon' }
+];
+
+// DOM elements
+const qEl = document.getElementById('question');
+const optEl = document.getElementById('options');
+const difficultyLabel = document.getElementById('difficultyLabel');
+const streakLabel = document.getElementById('streakLabel');
+const totalLabel = document.getElementById('totalLabel');
+const encounterArea = document.getElementById('encounterArea');
+const continueBtn = document.getElementById('continueBtn');
+const inputRow = document.getElementById('inputRow');
+const answerInput = document.getElementById('answerInput');
+const hintBtn = document.getElementById('hintBtn');
+const soundToggle = document.getElementById('soundToggle');
+const hintsToggle = document.getElementById('hintsToggle');
+
+// Game state variables
+let currentAnswer = '';
+let retryState = null;
+let lastQuestionStart = Date.now();
+let currentQuestionType = null;
+let gameTimerInterval = null;
+let rocketBattleState = null;
+
+// ========== UTILITY FUNCTIONS ==========
 function save() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
-    console.warn('Error saving data:', e);
+    console.warn('Could not save to localStorage:', e);
   }
 }
 
-load();
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const loaded = JSON.parse(saved);
+      Object.assign(state, loaded);
+    }
+  } catch (e) {
+    console.warn('Could not load from localStorage:', e);
+  }
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  document.getElementById(screenId).style.display = 'block';
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function speak(text) {
+  if (state.sound && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = state.speechRate || 0.8;
+    utterance.volume = 0.8;
+    speechSynthesis.speak(utterance);
+  }
+}
+
+function playSound(type) {
+  if (!state.sound) return;
+  
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    if (type === 'correct') {
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+    } else if (type === 'wrong') {
+      oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.2);
+    }
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (e) {
+    console.log('Audio not supported');
+  }
+}
+
+function showTempMessage(msg, duration = 2000, type = 'success') {
+  const feedbackEl = document.getElementById('feedback');
+  feedbackEl.textContent = msg;
+  feedbackEl.className = `small center ${type}`;
+  setTimeout(() => {
+    feedbackEl.textContent = '';
+    feedbackEl.className = 'small center';
+  }, duration);
+}
+
+function unlockAchievement(id) {
+  if (state.achievementsUnlocked[id]) return;
+  state.achievementsUnlocked[id] = true;
+  const achievement = achievements[id];
+  if (achievement) {
+    showTempMessage(`🏆 ${achievement.name}: ${achievement.description}`, 4000, 'success');
+  }
+  save();
+  renderAchievements();
+}
 
 // ========== MATH SYSTEM ==========
 function getMathDifficultyLevel(type) {
@@ -176,7 +463,6 @@ function adjustMathDifficulty(type, wasCorrect) {
     state.mathStreak++;
     state.mathSessionCorrect++;
     
-    // Increase difficulty if they're doing well
     if (state.mathStreak >= 5 && currentLevel < 5) {
       if (type === 'addition') {
         state.additionLevel++;
@@ -187,11 +473,10 @@ function adjustMathDifficulty(type, wasCorrect) {
         showTempMessage(`🎉 Subtraction Level ${state.subtractionLevel} unlocked!`, 2000, 'success');
         if (state.subtractionLevel === 5) unlockAchievement('subtraction_expert');
       }
-      state.mathStreak = 0; // Reset streak after level up
+      state.mathStreak = 0;
     }
   } else {
     state.mathStreak = 0;
-    // Don't decrease difficulty immediately, but track mistakes
   }
   
   state.mathSessionTotal++;
@@ -199,282 +484,117 @@ function adjustMathDifficulty(type, wasCorrect) {
 }
 
 function generateAdditionProblem(level) {
-  let num1, num2, max;
+  const gradeContent = getGradeContent();
+  const max1 = gradeContent.addition.max1;
+  const max2 = gradeContent.addition.max2;
+  const maxSum = gradeContent.addition.maxSum;
   
-  switch(level) {
-    case 1: // 1+1 to 5+5
-      max = 5;
-      num1 = Math.floor(Math.random() * max) + 1;
-      num2 = Math.floor(Math.random() * max) + 1;
+  let num1, num2;
+  
+  const complexity = Math.min(state.gradeLevel + level - 1, 6);
+  
+  switch(complexity) {
+    case 1:
+      num1 = Math.floor(Math.random() * Math.min(5, max1)) + 1;
+      num2 = Math.floor(Math.random() * Math.min(5, max2)) + 1;
       break;
-    case 2: // 1+1 to 10+10, ensure sum ≤ 20
-      max = 10;
-      num1 = Math.floor(Math.random() * max) + 1;
-      num2 = Math.floor(Math.random() * (20 - num1)) + 1;
+    case 2:
+      num1 = Math.floor(Math.random() * Math.min(10, max1)) + 1;
+      num2 = Math.floor(Math.random() * Math.min(10, max2)) + 1;
+      if (num1 + num2 > maxSum) num2 = maxSum - num1;
       break;
-    case 3: // 10+10 to 25+25
-      num1 = Math.floor(Math.random() * 16) + 10; // 10-25
-      num2 = Math.floor(Math.random() * 16) + 10; // 10-25
+    case 3:
+      num1 = Math.floor(Math.random() * Math.min(20, max1)) + 1;
+      num2 = Math.floor(Math.random() * Math.min(20, max2)) + 1;
+      if (num1 + num2 > maxSum) num2 = maxSum - num1;
       break;
-    case 4: // 20+20 to 50+50
-      num1 = Math.floor(Math.random() * 31) + 20; // 20-50
-      num2 = Math.floor(Math.random() * 31) + 20; // 20-50
+    case 4:
+      num1 = Math.floor(Math.random() * Math.min(35, max1)) + 10;
+      num2 = Math.floor(Math.random() * Math.min(35, max2)) + 10;
+      if (num1 + num2 > maxSum) num2 = maxSum - num1;
       break;
-    case 5: // 25+25 to 99+99
-      num1 = Math.floor(Math.random() * 75) + 25; // 25-99
-      num2 = Math.floor(Math.random() * 75) + 25; // 25-99
+    case 5:
+      num1 = Math.floor(Math.random() * Math.min(50, max1)) + 15;
+      num2 = Math.floor(Math.random() * Math.min(50, max2)) + 15;
+      if (num1 + num2 > maxSum) num2 = maxSum - num1;
       break;
     default:
-      num1 = Math.floor(Math.random() * 5) + 1;
-      num2 = Math.floor(Math.random() * 5) + 1;
+      num1 = Math.floor(Math.random() * max1) + 20;
+      num2 = Math.floor(Math.random() * max2) + 20;
+      if (num1 + num2 > maxSum) num2 = maxSum - num1;
   }
   
   return { num1, num2, answer: num1 + num2, operation: '+' };
 }
 
 function generateSubtractionProblem(level) {
+  const gradeContent = getGradeContent();
+  const minStart = gradeContent.subtraction.minStart;
+  const maxStart = gradeContent.subtraction.maxStart;
+  const maxSub = gradeContent.subtraction.maxSub;
+  
   let num1, num2;
   
-  switch(level) {
-    case 1: // 5-1 to 10-5
-      num1 = Math.floor(Math.random() * 6) + 5; // 5-10
-      num2 = Math.floor(Math.random() * num1) + 1; // 1 to num1
+  const complexity = Math.min(state.gradeLevel + level - 1, 6);
+  
+  switch(complexity) {
+    case 1:
+      num1 = Math.floor(Math.random() * 6) + 5;
+      num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
       break;
-    case 2: // 10-5 to 20-10
-      num1 = Math.floor(Math.random() * 11) + 10; // 10-20
-      num2 = Math.floor(Math.random() * (num1 - 1)) + 1; // 1 to num1-1
+    case 2:
+      num1 = Math.floor(Math.random() * 11) + Math.max(10, minStart);
+      num2 = Math.floor(Math.random() * Math.min(10, num1 - 1)) + 1;
       break;
-    case 3: // 20-10 to 50-25
-      num1 = Math.floor(Math.random() * 31) + 20; // 20-50
-      num2 = Math.floor(Math.random() * (num1 - 10)) + 10; // 10 to num1-10
+    case 3:
+      num1 = Math.floor(Math.random() * 21) + Math.max(20, minStart);
+      num2 = Math.floor(Math.random() * Math.min(20, num1 - 10)) + 5;
       break;
-    case 4: // 50-25 to 75-35
-      num1 = Math.floor(Math.random() * 26) + 50; // 50-75
-      num2 = Math.floor(Math.random() * (num1 - 20)) + 20; // 20 to num1-20
+    case 4:
+      num1 = Math.floor(Math.random() * 31) + Math.max(30, minStart);
+      num2 = Math.floor(Math.random() * Math.min(30, num1 - 10)) + 10;
       break;
-    case 5: // 75-50 to 100-25
-      num1 = Math.floor(Math.random() * 26) + 75; // 75-100
-      num2 = Math.floor(Math.random() * (num1 - 25)) + 25; // 25 to num1-25
+    case 5:
+      num1 = Math.floor(Math.random() * 41) + Math.max(40, minStart);
+      num2 = Math.floor(Math.random() * Math.min(maxSub, num1 - 15)) + 15;
       break;
     default:
-      num1 = Math.floor(Math.random() * 6) + 5;
-      num2 = Math.floor(Math.random() * num1) + 1;
+      num1 = Math.floor(Math.random() * (maxStart - minStart)) + minStart;
+      num2 = Math.floor(Math.random() * Math.min(maxSub, num1 - 20)) + 20;
   }
   
   return { num1, num2, answer: num1 - num2, operation: '-' };
 }
 
 function chooseMathProblemType() {
-  // Choose between addition and subtraction based on current levels
   const addLevel = state.additionLevel;
   const subLevel = state.subtractionLevel;
   
-  // Favor the operation they need more practice with
   if (addLevel > subLevel + 1) return 'subtraction';
   if (subLevel > addLevel + 1) return 'addition';
   
-  // Otherwise random choice
   return Math.random() < 0.5 ? 'addition' : 'subtraction';
 }
+
+// ========== NUMBER FUNCTIONS ==========
 function numToWords(n) {
-  const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-  const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
   
+  if (n === 0) return 'zero';
   if (n < 20) return ones[n];
-  if (n < 100) {
-    const t = Math.floor(n / 10), o = n % 10;
-    return tens[t] + (o ? "-" + ones[o] : "");
-  }
-  if (n === 100) return 'one hundred';
-  if (n < 200) {
-    const r = n - 100;
-    return 'one hundred' + (r ? ' ' + numToWords(r) : '');
-  }
-  if (n === 200) return 'two hundred';
-  return String(n);
-}
-
-function speak(text) {
-  if (!state.sound) return;
-  if ('speechSynthesis' in window) {
-    const u = new SpeechSynthesisUtterance(text);
-    const v = speechSynthesis.getVoices().find(v => /female|zira|susan|kathy/i.test((v.name || '') + (v.lang || '') + (v.voiceURI || '')));
-    if (v) u.voice = v;
-    u.rate = 0.8;
-    u.pitch = 1.1;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  }
-}
-
-function playSound(type) {
-  if (!state.sound) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') ctx.resume();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g);
-    g.connect(ctx.destination);
-    if (type === 'correct') {
-      o.frequency.value = 880;
-      o.type = 'sine';
-      g.gain.value = 0.07;
-    } else if (type === 'wrong') {
-      o.frequency.value = 220;
-      o.type = 'sawtooth';
-      g.gain.value = 0.07;
-    } else if (type === 'achievement') {
-      // Play a sequence of notes for achievements
-      const notes = [523, 659, 784, 1047]; // C, E, G, C
-      notes.forEach((freq, i) => {
-        setTimeout(() => {
-          const o2 = ctx.createOscillator();
-          const g2 = ctx.createGain();
-          o2.connect(g2);
-          g2.connect(ctx.destination);
-          o2.frequency.value = freq;
-          o2.type = 'sine';
-          g2.gain.value = 0.05;
-          o2.start();
-          o2.stop(ctx.currentTime + 0.2);
-        }, i * 150);
-      });
-      return;
-    }
-    o.start();
-    o.stop(ctx.currentTime + 0.14);
-  } catch (e) {
-    console.warn('Audio error:', e);
-  }
-}
-
-function getRarity(index) {
-  if (LEGENDARIES.has(index)) return 'legendary';
-  if (RARES.has(index) || index > 120) return 'rare';
-  return 'common';
-}
-
-function getCatchChance(index) {
-  const r = getRarity(index);
-  if (r === 'legendary') return 0.12;
-  if (r === 'rare') return 0.35;
-  return 0.75;
-}
-
-function unlockAchievement(key) {
-  if (!state.achievementsUnlocked[key]) {
-    state.achievementsUnlocked[key] = true;
-    save();
-    playSound('achievement');
-    showTempMessage(`🏆 Achievement unlocked: ${achievements[key].name}`, 3000, 'success');
-    renderAchievements();
-  }
-}
-
-function showTempMessage(msg, ms = 1200, type = 'default') {
-  const fb = document.getElementById('feedback');
-  fb.textContent = msg;
-  fb.className = `small center feedback-${type}`;
-  setTimeout(() => {
-    if (fb.textContent === msg) {
-      fb.textContent = '';
-      fb.className = 'small center';
-    }
-  }, ms);
-}
-
-// ========== UI REFS ==========
-const qEl = document.getElementById('question');
-const optEl = document.getElementById('options');
-const inputRow = document.getElementById('inputRow');
-const answerInput = document.getElementById('answerInput');
-const encounterArea = document.getElementById('encounterArea');
-const collectionBar = document.getElementById('collectionBar');
-const difficultyLabel = document.getElementById('difficultyLabel');
-const streakLabel = document.getElementById('streakLabel');
-const totalLabel = document.getElementById('totalLabel');
-const continueBtn = document.getElementById('continueBtn');
-const eggsBar = document.getElementById('eggsBar');
-const soundToggle = document.getElementById('soundToggle');
-const hintsToggle = document.getElementById('hintsToggle');
-const hintBtn = document.getElementById('hintBtn');
-
-let gameTimerInterval = null;
-let retryState = null;
-let lastQuestionStart = 0;
-let currentAnswer = null;
-let selectedLetters = [];
-let currentQuestionType = null;
-
-// ========== GAME FLOW ==========
-function updateStats() {
-  const modeNames = {
-    'numbers': 'Numbers Only',
-    'reading': 'Reading Only',
-    'math': 'Math Only',
-    'mixed': 'Mixed Learning'
-  };
-  difficultyLabel.textContent = modeNames[state.gameMode] || 'Mixed Learning';
-  streakLabel.textContent = state.streak;
-  totalLabel.textContent = state.correctTotal + state.readingTotal + state.mathTotal;
-}
-
-function startGame() {
-  state.streak = 0;
-  save();
-  updateCollectionBar();
-  renderEggs();
-  renderAchievements();
-  updateStats();
-  
-  if (!gameTimerInterval) {
-    gameTimerInterval = setInterval(checkEggs, 1000);
-  }
-  nextQuestion();
-  showScreen('game');
-}
-
-function quitToMenu() {
-  // Force clear any ongoing state
-  state.lastQuestion = null;
-  retryState = null;
-  currentQuestionType = null;
-  
-  // Clear any active intervals
-  if (gameTimerInterval) {
-    clearInterval(gameTimerInterval);
-    gameTimerInterval = null;
-  }
-  
-  // Clear the interface
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'small center';
-  encounterArea.innerHTML = '';
-  continueBtn.style.display = 'none';
-  inputRow.style.display = 'none';
-  hintBtn.style.display = 'none';
-  optEl.innerHTML = '';
-  
-  save();
-  showScreen('menu');
-}
-
-function pickWeightedCreature() {
-  const pool = [];
-  creatures.forEach(c => {
-    const r = getRarity(c.index);
-    let w = (r === 'common' ? 10 : (r === 'rare' ? 4 : 1));
-    if (state.correctTotal + state.readingTotal > 50 && r === 'rare') w += 3;
-    if (state.correctTotal + state.readingTotal > 120 && r === 'legendary') w += 2;
-    for (let i = 0; i < w; i++) pool.push(c);
-  });
-  return pool[Math.floor(Math.random() * pool.length)];
+  if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? '-' + ones[n%10] : '');
+  if (n < 200) return 'one hundred' + (n%100 ? ' ' + numToWords(n%100) : '');
+  return 'two hundred';
 }
 
 function chooseNumber() {
+  const gradeContent = getGradeContent();
+  const min = gradeContent.numbers.min;
+  const max = gradeContent.numbers.max;
+  
   const pool = [];
-  for (let n of numbers) {
+  for (let n = min; n <= max; n++) {
     const mastered = state.mastered.includes(n);
     const mistakes = state.mistakes[n] || 0;
     const m = mastered ? 1 : 3;
@@ -485,10 +605,11 @@ function chooseNumber() {
 }
 
 function chooseReadingWord() {
-  const allWords = [...readingWords.simple, ...readingWords.medium, ...readingWords.hard, ...sightWords];
-  const pool = [];
+  const gradeContent = getGradeContent();
+  const gradeWords = [...gradeContent.readingWords, ...gradeContent.sightWords];
   
-  for (let word of allWords) {
+  const pool = [];
+  for (let word of gradeWords) {
     const mastered = state.readingMastered.includes(word);
     const mistakes = state.readingMistakes[word] || 0;
     const m = mastered ? 1 : 3;
@@ -498,244 +619,219 @@ function chooseReadingWord() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function nextQuestion() {
-  updateStats();
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'small center';
-  encounterArea.innerHTML = '';
-  continueBtn.style.display = 'none';
-  inputRow.style.display = 'none';
-  hintBtn.style.display = 'none';
-  optEl.innerHTML = '';
-  answerInput.value = '';
-  answerInput.placeholder = 'Type your answer';
-  retryState = null;
-  lastQuestionStart = Date.now();
-  currentQuestionType = null;
+// ========== TEAM ROCKET BATTLE SYSTEM ==========
+function startRocketBattle() {
+  rocketBattleState = {
+    questionsAsked: 0,
+    questionsCorrect: 0,
+    targetCorrect: 3,
+    isActive: true
+  };
   
-  // Determine question type based on game mode
-  let questionTypes = [];
+  showScreen('rocketBattle');
+  document.getElementById('rocketProgress').textContent = `0/${rocketBattleState.targetCorrect}`;
   
-  if (state.gameMode === 'numbers') {
-    questionTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
-                     'placeValue', 'placeValueReverse', 'placeValueDifferent',
-                     'nearestTen', 'compare', 'orderNumbers', 'findPattern'];
-  } else if (state.gameMode === 'reading') {
-    questionTypes = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'];
-  } else if (state.gameMode === 'math') {
-    questionTypes = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'];
-  } else if (state.gameMode === 'time') {
-    questionTypes = ['timeTelling', 'dailyActivity', 'timeSequence'];
-  } else if (state.gameMode === 'science') {
-    questionTypes = ['animalIdentification', 'animalHabitat', 'weatherPattern'];
-  } else { // mixed mode
-    const numTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
-                      'placeValue', 'nearestTen', 'compare'];
-    const readTypes = ['readWord', 'sightWord', 'rhyming', 'phonics'];
-    const mathTypes = ['addition', 'subtraction'];
-    const timeTypes = ['timeTelling', 'dailyActivity'];
-    const scienceTypes = ['animalIdentification', 'weatherPattern'];
-    questionTypes = [...numTypes, ...readTypes, ...mathTypes, ...timeTypes, ...scienceTypes];
-  }
+  setTimeout(() => {
+    nextRocketQuestion();
+  }, 1000);
+}
+
+function nextRocketQuestion() {
+  if (!rocketBattleState || !rocketBattleState.isActive) return;
   
+  document.getElementById('rocketFeedback').textContent = '';
+  document.getElementById('rocketOptions').innerHTML = '';
+  
+  // Choose a random question type for Team Rocket
+  const questionTypes = ['numbers', 'reading', 'math', 'science'];
   const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-  currentQuestionType = type;
   
-  // Set state.lastQuestion for all question types
-  if (['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(type)) {
-    state.lastQuestion = chooseReadingWord();
-  } else if (['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(type)) {
-    state.lastQuestion = type; // Store the type, actual problem generated in show function
-  } else if (['timeTelling', 'dailyActivity', 'timeSequence'].includes(type)) {
-    state.lastQuestion = type; // Time problems generate their own content
-  } else if (['animalIdentification', 'animalHabitat', 'weatherPattern'].includes(type)) {
-    state.lastQuestion = type; // Science problems generate their own content
+  if (type === 'numbers') {
+    const num = chooseNumber();
+    currentAnswer = numToWords(num);
+    document.getElementById('rocketQuestion').textContent = `How do you spell the number ${num}?`;
+    speak(`Team Rocket challenges you: How do you spell the number ${num}?`);
+    
+    const correctAnswer = currentAnswer;
+    const wrongAnswers = [
+      numToWords(Math.max(1, num - 1)),
+      numToWords(Math.min(200, num + 1)),
+      numToWords(Math.floor(Math.random() * 50) + 1)
+    ];
+    
+    const choices = [correctAnswer, ...wrongAnswers.slice(0, 3)];
+    shuffleArray(choices);
+    
+    choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => handleRocketAnswer(choice);
+      document.getElementById('rocketOptions').appendChild(btn);
+    });
+    
+  } else if (type === 'reading') {
+    const word = chooseReadingWord();
+    currentAnswer = word;
+    document.getElementById('rocketQuestion').textContent = `What word is this: ${word}?`;
+    speak(`Team Rocket challenges you: What word is this: ${word}?`);
+    
+    const gradeContent = getGradeContent();
+    const allWords = [...gradeContent.readingWords, ...gradeContent.sightWords];
+    const wrongWords = allWords.filter(w => w !== word);
+    const choices = [word, ...wrongWords.slice(0, 3)];
+    shuffleArray(choices);
+    
+    choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => handleRocketAnswer(choice);
+      document.getElementById('rocketOptions').appendChild(btn);
+    });
+    
+  } else if (type === 'math') {
+    const mathType = chooseMathProblemType();
+    const level = getMathDifficultyLevel(mathType);
+    const problem = mathType === 'addition' ? generateAdditionProblem(level) : generateSubtractionProblem(level);
+    
+    currentAnswer = String(problem.answer);
+    document.getElementById('rocketQuestion').textContent = `What is ${problem.num1} ${problem.operation} ${problem.num2}?`;
+    speak(`Team Rocket challenges you: What is ${problem.num1} ${problem.operation === '+' ? 'plus' : 'minus'} ${problem.num2}?`);
+    
+    const correctAnswer = problem.answer;
+    const wrongAnswers = [
+      correctAnswer + 1,
+      correctAnswer - 1,
+      Math.floor(Math.random() * 20) + 1
+    ];
+    
+    const choices = [correctAnswer, ...wrongAnswers];
+    shuffleArray(choices);
+    
+    choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => handleRocketAnswer(String(choice));
+      document.getElementById('rocketOptions').appendChild(btn);
+    });
+    
+  } else if (type === 'science') {
+    const animal = scienceContent.animals[Math.floor(Math.random() * scienceContent.animals.length)];
+    currentAnswer = animal.name;
+    document.getElementById('rocketQuestion').textContent = `Which animal ${animal.fact}?`;
+    speak(`Team Rocket challenges you: Which animal ${animal.fact}?`);
+    
+    const wrongAnimals = scienceContent.animals.filter(a => a !== animal);
+    const choices = [animal.name, ...wrongAnimals.slice(0, 3).map(a => a.name)];
+    shuffleArray(choices);
+    
+    choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => handleRocketAnswer(choice);
+      document.getElementById('rocketOptions').appendChild(btn);
+    });
+  }
+}
+
+function handleRocketAnswer(answer) {
+  if (!rocketBattleState || !rocketBattleState.isActive) return;
+  
+  rocketBattleState.questionsAsked++;
+  
+  if (answer.toLowerCase() === currentAnswer.toLowerCase()) {
+    rocketBattleState.questionsCorrect++;
+    document.getElementById('rocketFeedback').textContent = '🎉 Correct! Team Rocket is getting weaker!';
+    document.getElementById('rocketFeedback').className = 'small center success';
+    playSound('correct');
+    
+    document.getElementById('rocketProgress').textContent = `${rocketBattleState.questionsCorrect}/${rocketBattleState.targetCorrect}`;
+    
+    if (rocketBattleState.questionsCorrect >= rocketBattleState.targetCorrect) {
+      // Victory!
+      setTimeout(() => {
+        rocketVictory();
+      }, 1500);
+    } else {
+      setTimeout(() => {
+        nextRocketQuestion();
+      }, 1500);
+    }
   } else {
-    state.lastQuestion = chooseNumber();
-  }
-
-  // Show the appropriate question
-  if (type === 'spellTiles') showSpellTiles(state.lastQuestion, numToWords(state.lastQuestion));
-  else if (type === 'countForward') showCountForward(state.lastQuestion);
-  else if (type === 'countBackward') showCountBackward(state.lastQuestion);
-  else if (type === 'skipCount') showSkipCount();
-  else if (type === 'placeValue') showPlaceValue(state.lastQuestion);
-  else if (type === 'placeValueReverse') showPlaceValueReverse(state.lastQuestion);
-  else if (type === 'placeValueDifferent') showPlaceValueDifferent(state.lastQuestion);
-  else if (type === 'nearestTen') showNearestTen(state.lastQuestion);
-  else if (type === 'compare') showCompare();
-  else if (type === 'orderNumbers') showOrderNumbers();
-  else if (type === 'findPattern') showFindPattern();
-  else if (type === 'readWord') showReadWord(state.lastQuestion);
-  else if (type === 'sightWord') showSightWord(state.lastQuestion);
-  else if (type === 'rhyming') showRhyming();
-  else if (type === 'phonics') showPhonics(state.lastQuestion);
-  else if (type === 'syllables') showSyllables(state.lastQuestion);
-  else if (type === 'letterSounds') showLetterSounds();
-  else if (type === 'addition') showAddition();
-  else if (type === 'subtraction') showSubtraction();
-  else if (type === 'mathWordProblem') showMathWordProblem();
-  else if (type === 'mathComparison') showMathComparison();
-  else if (type === 'timeTelling') showTimeTelling();
-  else if (type === 'dailyActivity') showDailyActivity();
-  else if (type === 'timeSequence') showTimeSequence();
-  else if (type === 'animalIdentification') showAnimalIdentification();
-  else if (type === 'animalHabitat') showAnimalHabitat();
-  else if (type === 'weatherPattern') showWeatherPattern();
-}
-
-// ========== READING QUESTION TYPES ==========
-function showReadWord(word) {
-  currentAnswer = word;
-  qEl.textContent = `Read this word out loud, then type it:`;
-  
-  optEl.innerHTML = `<div class="word-display" id="wordDisplay">${word.toUpperCase()}</div>`;
-  
-  speak(`Read this word: ${word}`);
-  inputRow.style.display = 'flex';
-  answerInput.placeholder = 'Type the word you see';
-  answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
+    document.getElementById('rocketFeedback').textContent = `❌ Wrong! The correct answer was: ${currentAnswer}`;
+    document.getElementById('rocketFeedback').className = 'small center error';
+    playSound('wrong');
+    
+    setTimeout(() => {
+      nextRocketQuestion();
+    }, 2000);
   }
 }
 
-function showSightWord(word) {
-  if (!sightWords.includes(word)) {
-    word = sightWords[Math.floor(Math.random() * sightWords.length)];
+function rocketVictory() {
+  rocketBattleState.isActive = false;
+  state.rocketWins++;
+  
+  if (state.rocketWins >= 5) {
+    unlockAchievement('rocket_defeated');
   }
-  currentAnswer = word;
   
-  qEl.textContent = `Listen and type this sight word:`;
-  
-  setTimeout(() => {
-    speak(word);
-  }, 500);
-  
-  inputRow.style.display = 'flex';
-  answerInput.placeholder = 'Type what you heard';
-  answerInput.focus();
-  
-  const repeatBtn = document.createElement('button');
-  repeatBtn.textContent = '🔊 Repeat';
-  repeatBtn.className = 'secondary';
-  repeatBtn.onclick = () => speak(word);
-  optEl.appendChild(repeatBtn);
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
+  // Return stolen Pokemon
+  if (state.stolen.length > 0) {
+    const returned = state.stolen.splice(0, Math.min(3, state.stolen.length));
+    state.collection.push(...returned);
   }
+  
+  // Give bonus Pokemon
+  const available = creatures.filter(c => !state.collection.includes(c.name));
+  if (available.length > 0) {
+    const bonusPokemon = available[Math.floor(Math.random() * available.length)];
+    state.collection.push(bonusPokemon.name);
+  }
+  
+  save();
+  
+  document.getElementById('victoryMessage').innerHTML = `
+    <h2>🎉 You defeated Team Rocket!</h2>
+    <p>Great job! You answered ${rocketBattleState.questionsCorrect} questions correctly!</p>
+    <p>Team Rocket has fled, and your Pokémon are safe!</p>
+  `;
+  
+  const rewardsEl = document.getElementById('victoryRewards');
+  rewardsEl.innerHTML = `
+    <div class="victory-rewards">
+      <h3>Rewards:</h3>
+      <p>✨ All stolen Pokémon returned</p>
+      <p>🎁 Bonus rare Pokémon caught</p>
+      <p>🏆 Victory count: ${state.rocketWins}</p>
+    </div>
+  `;
+  
+  showScreen('victory');
+  
+  updateCollectionBar();
 }
 
-function showRhyming() {
-  const baseWords = Object.keys(rhymingPairs);
-  const baseWord = baseWords[Math.floor(Math.random() * baseWords.length)];
-  const rhymes = rhymingPairs[baseWord];
-  const correctRhyme = rhymes[Math.floor(Math.random() * rhymes.length)];
+function forfeitRocketBattle() {
+  if (!rocketBattleState) return;
   
-  currentAnswer = correctRhyme;
+  rocketBattleState.isActive = false;
   
-  qEl.textContent = `Which word rhymes with "${baseWord}"?`;
-  
-  const wrongChoices = [];
-  const allWords = [...readingWords.simple, ...readingWords.medium];
-  while (wrongChoices.length < 3) {
-    const word = allWords[Math.floor(Math.random() * allWords.length)];
-    if (!rhymes.includes(word) && word !== baseWord && !wrongChoices.includes(word)) {
-      wrongChoices.push(word);
+  // Steal some Pokemon
+  if (state.collection.length > 0) {
+    const stolenCount = Math.min(2, state.collection.length);
+    for (let i = 0; i < stolenCount; i++) {
+      const randomIndex = Math.floor(Math.random() * state.collection.length);
+      const stolen = state.collection.splice(randomIndex, 1)[0];
+      state.stolen.push(stolen);
     }
   }
   
-  const choices = [correctRhyme, ...wrongChoices];
-  shuffleArray(choices);
+  save();
+  showTempMessage('💔 Team Rocket stole some of your Pokémon! Win battles to get them back!', 3000, 'error');
   
-  speak(`Which word rhymes with ${baseWord}?`);
-  
-  choices.forEach((choice, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = choice;
-    btn.style.setProperty('--i', i);
-    btn.onclick = () => submitChoice(choice);
-    optEl.appendChild(btn);
-  });
-}
-
-function showPhonics(word) {
-  currentAnswer = word;
-  
-  // Break word into phonemes for display
-  const phonemes = word.split('').join(' - ');
-  
-  qEl.textContent = `Sound out this word and type it:`;
-  optEl.innerHTML = `<div class="phonics-display">${phonemes.toUpperCase()}</div>`;
-  
-  speak(`Sound out this word: ${word.split('').join(', ')}`);
-  
-  inputRow.style.display = 'flex';
-  answerInput.placeholder = 'Type the word';
-  answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
-}
-
-function showSyllables(word) {
-  const syllableCount = countSyllables(word);
-  currentAnswer = String(syllableCount);
-  
-  qEl.textContent = `How many syllables are in "${word}"?`;
-  
-  speak(`How many syllables are in ${word}?`);
-  
-  const options = [1, 2, 3, 4];
-  options.forEach((count, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = `${count} syllable${count !== 1 ? 's' : ''}`;
-    btn.className = 'syllable-btn';
-    btn.style.setProperty('--i', i);
-    btn.onclick = () => submitChoice(String(count));
-    optEl.appendChild(btn);
-  });
-}
-
-function showLetterSounds() {
-  const letters = 'abcdefghijklmnopqrstuvwxyz';
-  const letter = letters[Math.floor(Math.random() * letters.length)];
-  currentAnswer = letter;
-  
-  qEl.textContent = `What letter makes this sound?`;
-  
-  const letterSound = getLetterSound(letter);
-  setTimeout(() => {
-    speak(letterSound);
-  }, 500);
-  
-  const wrongLetters = [];
-  while (wrongLetters.length < 3) {
-    const wrongLetter = letters[Math.floor(Math.random() * letters.length)];
-    if (wrongLetter !== letter && !wrongLetters.includes(wrongLetter)) {
-      wrongLetters.push(wrongLetter);
-    }
-  }
-  
-  const choices = [letter, ...wrongLetters];
-  shuffleArray(choices);
-  
-  choices.forEach((choice, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = choice.toUpperCase();
-    btn.style.setProperty('--i', i);
-    btn.onclick = () => submitChoice(choice);
-    optEl.appendChild(btn);
-  });
-  
-  const repeatBtn = document.createElement('button');
-  repeatBtn.textContent = '🔊 Repeat Sound';
-  repeatBtn.className = 'secondary';
-  repeatBtn.onclick = () => speak(letterSound);
-  optEl.appendChild(repeatBtn);
+  showScreen('game');
+  updateCollectionBar();
+  nextQuestion();
 }
 
 // ========== TIME & SCIENCE QUESTION TYPES ==========
@@ -748,7 +844,6 @@ function showTimeTelling() {
   
   qEl.textContent = `What time does this clock show?`;
   
-  // Create analog clock display
   const clockHtml = createAnalogClock(hour, minute);
   optEl.innerHTML = `<div class="clock-display">${clockHtml}</div>`;
   
@@ -785,7 +880,7 @@ function showDailyActivity() {
 }
 
 function showTimeSequence() {
-  const baseHour = Math.floor(Math.random() * 8) + 1; // 1-8
+  const baseHour = Math.floor(Math.random() * 8) + 1;
   const sequence = [
     `${baseHour}:00`,
     `${baseHour + 1}:00`,
@@ -895,8 +990,8 @@ function showWeatherPattern() {
 }
 
 function createAnalogClock(hour, minute) {
-  const hourAngle = (hour % 12) * 30 + (minute / 60) * 30; // 30 degrees per hour
-  const minuteAngle = minute * 6; // 6 degrees per minute
+  const hourAngle = (hour % 12) * 30 + (minute / 60) * 30;
+  const minuteAngle = minute * 6;
   
   return `
     <div class="analog-clock">
@@ -904,14 +999,16 @@ function createAnalogClock(hour, minute) {
         <div class="hour-hand" style="transform: rotate(${hourAngle}deg)"></div>
         <div class="minute-hand" style="transform: rotate(${minuteAngle}deg)"></div>
         <div class="clock-center"></div>
-        <div class="hour-marker hour-12"><span>12</span></div>
-        <div class="hour-marker hour-3"><span>3</span></div>
-        <div class="hour-marker hour-6"><span>6</span></div>
-        <div class="hour-marker hour-9"><span>9</span></div>
+        <div class="hour-12"><span>12</span></div>
+        <div class="hour-3"><span>3</span></div>
+        <div class="hour-6"><span>6</span></div>
+        <div class="hour-9"><span>9</span></div>
       </div>
     </div>
   `;
 }
+
+// ========== MATH QUESTION TYPES ==========
 function showAddition() {
   const level = getMathDifficultyLevel('addition');
   const problem = generateAdditionProblem(level);
@@ -921,7 +1018,6 @@ function showAddition() {
   
   qEl.textContent = `What is ${problem.num1} + ${problem.num2}?`;
   
-  // Create a visual math display
   optEl.innerHTML = `<div class="math-display">${problem.num1} + ${problem.num2} = ?</div>`;
   
   speak(`What is ${problem.num1} plus ${problem.num2}?`);
@@ -942,7 +1038,6 @@ function showSubtraction() {
   
   qEl.textContent = `What is ${problem.num1} - ${problem.num2}?`;
   
-  // Create a visual math display
   optEl.innerHTML = `<div class="math-display">${problem.num1} - ${problem.num2} = ?</div>`;
   
   speak(`What is ${problem.num1} minus ${problem.num2}?`);
@@ -1033,327 +1128,123 @@ function showMathComparison() {
     optEl.appendChild(btn);
   });
 }
-function countSyllables(word) {
-  const vowels = 'aeiouy';
-  let count = 0;
-  let prevIsVowel = false;
-  
-  for (let i = 0; i < word.length; i++) {
-    const isVowel = vowels.includes(word[i].toLowerCase());
-    if (isVowel && !prevIsVowel) count++;
-    prevIsVowel = isVowel;
-  }
-  
-  if (word.endsWith('e')) count--;
-  return Math.max(1, count);
-}
 
-function getLetterSound(letter) {
-  const sounds = {
-    'a': 'ah', 'b': 'buh', 'c': 'kuh', 'd': 'duh', 'e': 'eh',
-    'f': 'fuh', 'g': 'guh', 'h': 'huh', 'i': 'ih', 'j': 'juh',
-    'k': 'kuh', 'l': 'luh', 'm': 'muh', 'n': 'nuh', 'o': 'oh',
-    'p': 'puh', 'q': 'kwuh', 'r': 'ruh', 's': 'sss', 't': 'tuh',
-    'u': 'uh', 'v': 'vuh', 'w': 'wuh', 'x': 'ksss', 'y': 'yuh', 'z': 'zzz'
-  };
-  return sounds[letter] || letter;
-}
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-// ========== NUMBER QUESTION RENDERERS ==========
-function showSpellTiles(n, word) {
+// Helper functions for reading questions
+function showSpellTiles(num, word) {
   currentAnswer = word;
-  selectedLetters = [];
-  qEl.textContent = `Spell the number: ${n}`;
-  
-  // Get all letters from the word, including spaces and hyphens for proper spelling
-  const letters = word.split('').filter(c => c !== ' ' && c !== '-');
-  const shuffled = [...letters].sort(() => Math.random() - 0.5);
-  
-  // Clear the options area and create the tile interface
-  optEl.innerHTML = '';
-  
-  // Create display area
-  const tileDisplay = document.createElement('div');
-  tileDisplay.className = 'tile-display';
-  tileDisplay.id = 'tileDisplay';
-  tileDisplay.textContent = 'Click letters to spell the word';
-  optEl.appendChild(tileDisplay);
-  
-  // Create tile bank
-  const tileBank = document.createElement('div');
-  tileBank.className = 'tile-bank';
-  tileBank.id = 'tileBank';
-  
-  // Add letter tiles
-  shuffled.forEach((letter, i) => {
-    const tile = document.createElement('button');
-    tile.textContent = letter.toUpperCase(); // Make sure letters are visible
-    tile.className = 'letter-tile';
-    tile.style.setProperty('--i', i);
-    tile.onclick = () => selectLetter(letter, tile);
-    tileBank.appendChild(tile);
-  });
-  
-  // Add control buttons
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = '↺ Clear';
-  clearBtn.className = 'secondary';
-  clearBtn.onclick = clearLetters;
-  tileBank.appendChild(clearBtn);
-  
-  const submitBtn = document.createElement('button');
-  submitBtn.textContent = '✓ Check';
-  submitBtn.onclick = checkSpelling;
-  tileBank.appendChild(submitBtn);
-  
-  optEl.appendChild(tileBank);
-  
-  speak(`Spell the number ${n}`);
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
-}
-
-function selectLetter(letter, tile) {
-  selectedLetters.push(letter);
-  tile.disabled = true;
-  tile.style.opacity = '0.3';
-  updateTileDisplay();
-}
-
-function clearLetters() {
-  selectedLetters = [];
-  document.querySelectorAll('.letter-tile').forEach(tile => {
-    tile.disabled = false;
-    tile.style.opacity = '1';
-  });
-  updateTileDisplay();
-}
-
-function updateTileDisplay() {
-  const display = document.getElementById('tileDisplay');
-  if (!display) return;
-  
-  if (selectedLetters.length > 0) {
-    display.textContent = selectedLetters.join('');
-    display.classList.add('has-content');
-  } else {
-    display.textContent = 'Click letters to spell the word';
-    display.classList.remove('has-content');
-  }
-}
-
-function checkSpelling() {
-  const answer = selectedLetters.join('');
-  const correct = currentAnswer.replace(/[\s-]/g, '');
-  if (answer === correct) return handleCorrect();
-  else return handleWrong(currentAnswer);
-}
-
-function showCountForward(n) {
-  if (n >= 199) n = Math.floor(Math.random() * 180) + 1;
-  currentAnswer = String(n + 1);
-  qEl.textContent = `What number comes after ${n}?`;
-  speak(`What number comes after ${n}?`);
+  qEl.textContent = `How do you spell ${num}?`;
+  speak(`How do you spell ${num}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
+  if (state.hints) hintBtn.style.display = 'inline-block';
 }
 
-function showCountBackward(n) {
-  if (n <= 2) n = Math.floor(Math.random() * 180) + 20;
-  currentAnswer = String(n - 1);
-  qEl.textContent = `What number comes before ${n}?`;
-  speak(`What number comes before ${n}?`);
+function showCountForward(num) {
+  currentAnswer = String(num + 1);
+  qEl.textContent = `What number comes after ${num}?`;
+  speak(`What number comes after ${num}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showCountBackward(num) {
+  currentAnswer = String(num - 1);
+  qEl.textContent = `What number comes before ${num}?`;
+  speak(`What number comes before ${num}?`);
+  inputRow.style.display = 'flex';
+  answerInput.focus();
+  if (state.hints) hintBtn.style.display = 'inline-block';
 }
 
 function showSkipCount() {
-  const skip = [2, 5, 10, 20, 50][Math.floor(Math.random() * 5)];
-  const start = Math.floor(Math.random() * (150 / skip)) * skip;
-  const sequence = [];
-  for (let i = 0; i < 5; i++) sequence.push(start + i * skip);
-  const blankIndex = 2 + Math.floor(Math.random() * 2);
-  currentAnswer = String(sequence[blankIndex]);
-  sequence[blankIndex] = '___';
-  
-  qEl.textContent = `Skip count by ${skip}s. What is the missing number?`;
-  optEl.innerHTML = `<div class="number-line">${sequence.join(' → ')}</div>`;
-  speak(`Skip count by ${skip}s`);
+  const start = Math.floor(Math.random() * 5) + 2;
+  const step = [2, 5, 10][Math.floor(Math.random() * 3)];
+  const sequence = [start, start + step, start + 2*step, '___', start + 4*step];
+  currentAnswer = String(start + 3*step);
+  qEl.textContent = `What number comes next?`;
+  optEl.innerHTML = `<div class="sequence">${sequence.join(', ')}</div>`;
+  speak(`What number comes next in the sequence: ${sequence.slice(0, 3).join(', ')}`);
   inputRow.style.display = 'flex';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
+  if (state.hints) hintBtn.style.display = 'inline-block';
 }
 
-function showPlaceValue(n) {
-  currentAnswer = String(n);
-  const h = Math.floor(n / 100);
-  const t = Math.floor((n % 100) / 10);
-  const o = n % 10;
-  
-  qEl.textContent = `What number is this?`;
-  optEl.innerHTML = `<div class="place-value-display">${h} hundred${h !== 1 ? 's' : ''}, ${t} ten${t !== 1 ? 's' : ''}, ${o} one${o !== 1 ? 's' : ''}</div>`;
-  speak(`${h} hundreds, ${t} tens, ${o} ones`);
+function showPlaceValue(num) {
+  const digit = num < 10 ? num : (num < 100 ? Math.floor(num/10) : Math.floor(num/100));
+  const place = num < 10 ? 'ones' : (num < 100 ? 'tens' : 'hundreds');
+  currentAnswer = String(digit);
+  qEl.textContent = `What digit is in the ${place} place in ${num}?`;
+  speak(`What digit is in the ${place} place in ${num}?`);
   inputRow.style.display = 'flex';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showPlaceValueReverse(num) {
+  if (num < 10) {
+    currentAnswer = String(num);
+    qEl.textContent = `What number has ${num} in the ones place?`;
+  } else if (num < 100) {
+    const tens = Math.floor(num/10);
+    const ones = num % 10;
+    currentAnswer = String(num);
+    qEl.textContent = `What number has ${tens} in the tens place and ${ones} in the ones place?`;
   }
-}
-
-function showPlaceValueReverse(n) {
-  currentAnswer = `${Math.floor(n / 100)} ${Math.floor((n % 100) / 10)} ${n % 10}`;
-  qEl.textContent = `Write ${n} using place value:`;
-  optEl.innerHTML = `
-    <div class="place-value-inputs">
-      <div class="pv-group">
-        <label>Hundreds</label>
-        <input type="text" id="pvHundreds" maxlength="1" />
-      </div>
-      <div class="pv-group">
-        <label>Tens</label>
-        <input type="text" id="pvTens" maxlength="1" />
-      </div>
-      <div class="pv-group">
-        <label>Ones</label>
-        <input type="text" id="pvOnes" maxlength="1" />
-      </div>
-    </div>
-  `;
-  speak(`Write ${n} using place value`);
-  
-  // Auto-focus and auto-advance between inputs
-  const h = document.getElementById('pvHundreds');
-  const t = document.getElementById('pvTens');
-  const o = document.getElementById('pvOnes');
-  h.focus();
-  h.oninput = () => { if (h.value) t.focus(); };
-  t.oninput = () => { if (t.value) o.focus(); };
-  o.onkeydown = (e) => { if (e.key === 'Enter') submitPlaceValue(); };
-  
-  const submitBtn = document.createElement('button');
-  submitBtn.textContent = 'Submit';
-  submitBtn.onclick = submitPlaceValue;
-  submitBtn.style.marginTop = '15px';
-  optEl.appendChild(submitBtn);
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
-}
-
-function submitPlaceValue() {
-  const h = document.getElementById('pvHundreds').value.trim();
-  const t = document.getElementById('pvTens').value.trim();
-  const o = document.getElementById('pvOnes').value.trim();
-  const answer = `${h} ${t} ${o}`;
-  
-  if (answer === currentAnswer) return handleCorrect();
-  else return handleWrong(currentAnswer);
-}
-
-function showPlaceValueDifferent(n) {
-  if (n < 20) n = 20 + Math.floor(Math.random() * 180);
-  const h = Math.floor(n / 100);
-  const t = Math.floor((n % 100) / 10);
-  const o = n % 10;
-  
-  const altT = h * 10 + t;
-  currentAnswer = `${altT} ${o}`;
-  
-  qEl.textContent = `${n} = ${h} hundred, ${t} tens, ${o} ones. Write it using only tens and ones:`;
-  optEl.innerHTML = `
-    <div class="place-value-inputs">
-      <div class="pv-group">
-        <label>Tens</label>
-        <input type="text" id="pvTens2" maxlength="2" />
-      </div>
-      <div class="pv-group">
-        <label>Ones</label>
-        <input type="text" id="pvOnes2" maxlength="1" />
-      </div>
-    </div>
-  `;
-  speak(`Write ${n} using tens and ones`);
-  
-  const t2 = document.getElementById('pvTens2');
-  const o2 = document.getElementById('pvOnes2');
-  t2.focus();
-  t2.oninput = () => { if (t2.value.length >= 2) o2.focus(); };
-  o2.onkeydown = (e) => { if (e.key === 'Enter') submitPlaceValueDiff(); };
-  
-  const submitBtn = document.createElement('button');
-  submitBtn.textContent = 'Submit';
-  submitBtn.onclick = submitPlaceValueDiff;
-  submitBtn.style.marginTop = '15px';
-  optEl.appendChild(submitBtn);
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
-}
-
-function submitPlaceValueDiff() {
-  const t = document.getElementById('pvTens2').value.trim();
-  const o = document.getElementById('pvOnes2').value.trim();
-  const answer = `${t} ${o}`;
-  
-  if (answer === currentAnswer) return handleCorrect();
-  else return handleWrong(currentAnswer);
-}
-
-function showNearestTen(n) {
-  const mod = n % 10;
-  if (mod === 0) n = n + Math.floor(Math.random() * 9) + 1;
-  currentAnswer = String(mod < 5 ? n - mod : n + (10 - mod));
-  
-  qEl.textContent = `What is the nearest ten to ${n}?`;
-  speak(`What is the nearest ten to ${n}?`);
+  speak(qEl.textContent);
   inputRow.style.display = 'flex';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showPlaceValueDifferent(num) {
+  const options = [];
+  for (let i = 0; i < 4; i++) {
+    let n = num;
+    if (i > 0) n = Math.floor(Math.random() * 99) + 1;
+    options.push(n);
   }
+  shuffleArray(options);
+  currentAnswer = String(num);
+  
+  const digit = num < 10 ? num : Math.floor(num/10);
+  const place = num < 10 ? 'ones' : 'tens';
+  qEl.textContent = `Which number has ${digit} in the ${place} place?`;
+  speak(qEl.textContent);
+  
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.onclick = () => submitChoice(String(opt));
+    optEl.appendChild(btn);
+  });
+}
+
+function showNearestTen(num) {
+  const mod = num % 10;
+  const lower = num - mod;
+  const upper = lower + 10;
+  currentAnswer = String(mod < 5 ? lower : upper);
+  qEl.textContent = `What is ${num} rounded to the nearest ten?`;
+  speak(`What is ${num} rounded to the nearest ten?`);
+  inputRow.style.display = 'flex';
+  answerInput.focus();
+  if (state.hints) hintBtn.style.display = 'inline-block';
 }
 
 function showCompare() {
-  const n1 = Math.floor(Math.random() * 200) + 1;
-  let n2 = Math.floor(Math.random() * 200) + 1;
-  while (n2 === n1) n2 = Math.floor(Math.random() * 200) + 1;
+  const num1 = chooseNumber();
+  let num2 = chooseNumber();
+  while (num2 === num1) num2 = chooseNumber();
   
-  currentAnswer = n1 > n2 ? '>' : '<';
-  
-  qEl.textContent = `Which symbol goes between these numbers?`;
-  optEl.innerHTML = `<div class="compare-display">${n1} ___ ${n2}</div>`;
-  speak(`Compare ${n1} and ${n2}`);
+  currentAnswer = num1 > num2 ? '>' : '<';
+  qEl.textContent = `Which symbol goes between ${num1} and ${num2}?`;
+  speak(`Which symbol goes between ${num1} and ${num2}?`);
   
   const symbols = ['>', '<'];
-  symbols.forEach((sym, i) => {
+  symbols.forEach(sym => {
     const btn = document.createElement('button');
-    btn.textContent = sym;
-    btn.className = 'symbol-btn';
-    btn.style.setProperty('--i', i);
+    btn.textContent = `${num1} ${sym} ${num2}`;
     btn.onclick = () => submitChoice(sym);
     optEl.appendChild(btn);
   });
@@ -1361,128 +1252,261 @@ function showCompare() {
 
 function showOrderNumbers() {
   const nums = [];
-  while (nums.length < 4) {
-    const n = Math.floor(Math.random() * 200) + 1;
-    if (!nums.includes(n)) nums.push(n);
+  for (let i = 0; i < 3; i++) {
+    nums.push(chooseNumber());
   }
+  const sorted = [...nums].sort((a, b) => a - b);
+  currentAnswer = sorted.join(',');
   
-  const order = Math.random() > 0.5 ? 'least to greatest' : 'greatest to least';
-  const sorted = order === 'least to greatest' ? [...nums].sort((a, b) => a - b) : [...nums].sort((a, b) => b - a);
-  currentAnswer = sorted.join(' ');
-  
-  qEl.textContent = `Put these numbers in order from ${order}:`;
-  optEl.innerHTML = `<div class="numbers-to-order">${nums.join(', ')}</div><div class="small-muted">Type the numbers in order, separated by spaces</div>`;
-  speak(`Put these numbers in order from ${order}`);
+  qEl.textContent = `Put these numbers in order from smallest to largest:`;
+  optEl.innerHTML = `<div class="numbers">${nums.join(', ')}</div>`;
+  speak(`Put these numbers in order from smallest to largest: ${nums.join(', ')}`);
   inputRow.style.display = 'flex';
-  answerInput.placeholder = 'e.g. 5 10 15 20';
+  answerInput.placeholder = 'Separate with commas';
   answerInput.focus();
-  
-  if (state.hints) {
-    hintBtn.style.display = 'inline-block';
-  }
+  if (state.hints) hintBtn.style.display = 'inline-block';
 }
 
 function showFindPattern() {
-  const isIncreasing = Math.random() > 0.5;
-  const step = [1, 2, 3, 5, 10][Math.floor(Math.random() * 5)];
-  const start = Math.floor(Math.random() * 150) + 1;
+  const start = Math.floor(Math.random() * 10) + 1;
+  const step = Math.floor(Math.random() * 3) + 2;
+  const sequence = [start, start + step, start + 2*step];
+  currentAnswer = String(start + 3*step);
   
-  const sequence = [];
-  for (let i = 0; i < 6; i++) {
-    sequence.push(isIncreasing ? start + i * step : start - i * step);
-  }
-  
-  const blankIndex = 2 + Math.floor(Math.random() * 3);
-  currentAnswer = String(sequence[blankIndex]);
-  const pattern = isIncreasing ? 'increasing' : 'decreasing';
-  sequence[blankIndex] = '___';
-  
-  qEl.textContent = `Find the missing number in this ${pattern} pattern:`;
-  optEl.innerHTML = `<div class="number-line">${sequence.join(', ')}</div>`;
-  speak(`Find the missing number`);
+  qEl.textContent = `What comes next in this pattern?`;
+  optEl.innerHTML = `<div class="pattern">${sequence.join(', ')}, ___</div>`;
+  speak(`What comes next in this pattern: ${sequence.join(', ')}`);
   inputRow.style.display = 'flex';
   answerInput.focus();
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showReadWord(word) {
+  currentAnswer = word;
+  qEl.textContent = `Type this word: ${word}`;
+  speak(`Type this word: ${word}`);
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type what you see';
+  answerInput.focus();
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showSightWord(word) {
+  const gradeContent = getGradeContent();
+  const gradeSightWords = gradeContent.sightWords;
+  
+  if (!gradeSightWords.includes(word)) {
+    word = gradeSightWords[Math.floor(Math.random() * gradeSightWords.length)];
+  }
+  currentAnswer = word;
+  
+  qEl.textContent = `Listen and type this sight word:`;
+  
+  setTimeout(() => {
+    speak(word);
+  }, 500);
+  
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type what you heard';
+  answerInput.focus();
+  
+  const repeatBtn = document.createElement('button');
+  repeatBtn.textContent = '🔊 Repeat';
+  repeatBtn.className = 'secondary';
+  repeatBtn.onclick = () => speak(word);
+  optEl.appendChild(repeatBtn);
   
   if (state.hints) {
     hintBtn.style.display = 'inline-block';
   }
 }
 
-// ========== HINT SYSTEM ==========
-function showHint() {
-  if (!state.hints) return;
+function showRhyming() {
+  const words = ['cat', 'bat', 'hat', 'mat', 'rat'];
+  const target = words[Math.floor(Math.random() * words.length)];
+  const rhymes = words.filter(w => w !== target);
+  const nonRhymes = ['dog', 'sun', 'big', 'run'];
+  const choices = [rhymes[0], ...nonRhymes.slice(0, 3)];
+  shuffleArray(choices);
   
-  let hint = '';
+  currentAnswer = rhymes[0];
+  qEl.textContent = `Which word rhymes with "${target}"?`;
+  speak(`Which word rhymes with ${target}?`);
   
-  if (currentQuestionType === 'spellTiles') {
-    hint = `The word starts with "${currentAnswer[0]}" and has ${currentAnswer.replace(/[\s-]/g, '').length} letters.`;
-  } else if (currentQuestionType === 'countForward') {
-    hint = `When counting up, the next number after ${state.lastQuestion} is ${state.lastQuestion + 1}.`;
-  } else if (currentQuestionType === 'countBackward') {
-    hint = `When counting down, the number before ${state.lastQuestion} is ${state.lastQuestion - 1}.`;
-  } else if (currentQuestionType === 'readWord') {
-    hint = `Try sounding out each letter: ${state.lastQuestion.split('').join('-')}`;
-  } else if (currentQuestionType === 'sightWord') {
-    hint = `This is a common word that starts with "${currentAnswer[0]}".`;
-  } else if (currentQuestionType === 'phonics') {
-    hint = `Listen carefully to each sound and put them together.`;
-  } else if (currentQuestionType === 'addition') {
-    const parts = state.lastQuestion.split('+');
-    const num1 = parseInt(parts[0]);
-    const num2 = parseInt(parts[1]);
-    hint = `Try counting up from ${num1}. Add ${num2} more: ${num1} + 1 = ${num1 + 1}, then keep going!`;
-  } else if (currentQuestionType === 'subtraction') {
-    const parts = state.lastQuestion.split('-');
-    const num1 = parseInt(parts[0]);
-    const num2 = parseInt(parts[1]);
-    hint = `Start with ${num1} and count backwards ${num2} times. Or think: what plus ${num2} equals ${num1}?`;
-  } else if (currentQuestionType === 'mathWordProblem') {
-    if (state.lastQuestion.includes('+')) {
-      hint = `This is an addition problem. Look for words like "more", "total", "altogether", or "join".`;
-    } else {
-      hint = `This is a subtraction problem. Look for words like "left", "gave away", "lost", or "ate".`;
-    }
-  } else if (currentQuestionType === 'nearestTen') {
-    const n = state.lastQuestion;
-    const mod = n % 10;
-    if (mod < 5) {
-      hint = `${n} is closer to ${n - mod} because ${mod} is less than 5.`;
-    } else {
-      hint = `${n} is closer to ${n + (10 - mod)} because ${mod} is 5 or more.`;
-    }
-  } else {
-    hint = `Think about what you know about this type of problem.`;
-  }
-  
-  showTempMessage(`💡 Hint: ${hint}`, 4000, 'hint');
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.onclick = () => submitChoice(choice);
+    optEl.appendChild(btn);
+  });
 }
 
-// ========== SUBMISSION & RETRY LOGIC ==========
-function submitChoice(selected) {
-  if (String(selected) === String(currentAnswer)) return handleCorrect();
-  else return handleWrong(String(currentAnswer));
+function showPhonics(word) {
+  currentAnswer = word;
+  const sounds = word.split('').join(' - ');
+  qEl.textContent = `What word do these sounds make?`;
+  
+  setTimeout(() => {
+    speak(sounds);
+  }, 500);
+  
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type the word';
+  answerInput.focus();
+  
+  const repeatBtn = document.createElement('button');
+  repeatBtn.textContent = '🔊 Repeat Sounds';
+  repeatBtn.className = 'secondary';
+  repeatBtn.onclick = () => speak(sounds);
+  optEl.appendChild(repeatBtn);
+  
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function showSyllables(word) {
+  const syllableCount = word.split(/[aeiou]/).length - 1 || 1;
+  currentAnswer = String(Math.max(1, syllableCount));
+  
+  qEl.textContent = `How many syllables are in "${word}"?`;
+  speak(`How many syllables are in ${word}?`);
+  
+  for (let i = 1; i <= 4; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.onclick = () => submitChoice(String(i));
+    optEl.appendChild(btn);
+  }
+}
+
+function showLetterSounds() {
+  const letters = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'w'];
+  const letter = letters[Math.floor(Math.random() * letters.length)];
+  const sounds = {
+    'b': 'buh', 'c': 'kuh', 'd': 'duh', 'f': 'fuh', 'g': 'guh',
+    'h': 'huh', 'j': 'juh', 'k': 'kuh', 'l': 'luh', 'm': 'muh',
+    'n': 'nuh', 'p': 'puh', 'r': 'ruh', 's': 'suh', 't': 'tuh', 'w': 'wuh'
+  };
+  
+  currentAnswer = letter;
+  qEl.textContent = `What letter makes this sound?`;
+  
+  setTimeout(() => {
+    speak(sounds[letter]);
+  }, 500);
+  
+  inputRow.style.display = 'flex';
+  answerInput.placeholder = 'Type the letter';
+  answerInput.focus();
+  
+  const repeatBtn = document.createElement('button');
+  repeatBtn.textContent = '🔊 Repeat Sound';
+  repeatBtn.className = 'secondary';
+  repeatBtn.onclick = () => speak(sounds[letter]);
+  optEl.appendChild(repeatBtn);
+  
+  if (state.hints) hintBtn.style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  updateStats();
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'small center';
+  encounterArea.innerHTML = '';
+  continueBtn.style.display = 'none';
+  inputRow.style.display = 'none';
+  hintBtn.style.display = 'none';
+  optEl.innerHTML = '';
+  answerInput.value = '';
+  answerInput.placeholder = 'Type your answer';
+  retryState = null;
+  lastQuestionStart = Date.now();
+  currentQuestionType = null;
+  
+  let questionTypes = [];
+  
+  if (state.gameMode === 'numbers') {
+    questionTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
+                     'placeValue', 'placeValueReverse', 'placeValueDifferent',
+                     'nearestTen', 'compare', 'orderNumbers', 'findPattern'];
+  } else if (state.gameMode === 'reading') {
+    questionTypes = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'];
+  } else if (state.gameMode === 'math') {
+    questionTypes = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'];
+  } else if (state.gameMode === 'time') {
+    questionTypes = ['timeTelling', 'dailyActivity', 'timeSequence'];
+  } else if (state.gameMode === 'science') {
+    questionTypes = ['animalIdentification', 'animalHabitat', 'weatherPattern'];
+  } else { // mixed mode
+    const numTypes = ['spellTiles', 'countForward', 'countBackward', 'skipCount', 
+                      'placeValue', 'nearestTen', 'compare'];
+    const readTypes = ['readWord', 'sightWord', 'rhyming', 'phonics'];
+    const mathTypes = ['addition', 'subtraction'];
+    const timeTypes = ['timeTelling', 'dailyActivity'];
+    const scienceTypes = ['animalIdentification', 'weatherPattern'];
+    questionTypes = [...numTypes, ...readTypes, ...mathTypes, ...timeTypes, ...scienceTypes];
+  }
+  
+  const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+  currentQuestionType = type;
+  
+  if (['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(type)) {
+    state.lastQuestion = chooseReadingWord();
+  } else if (['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(type)) {
+    state.lastQuestion = type;
+  } else if (['timeTelling', 'dailyActivity', 'timeSequence'].includes(type)) {
+    state.lastQuestion = type;
+  } else if (['animalIdentification', 'animalHabitat', 'weatherPattern'].includes(type)) {
+    state.lastQuestion = type;
+  } else {
+    state.lastQuestion = chooseNumber();
+  }
+
+  if (type === 'spellTiles') showSpellTiles(state.lastQuestion, numToWords(state.lastQuestion));
+  else if (type === 'countForward') showCountForward(state.lastQuestion);
+  else if (type === 'countBackward') showCountBackward(state.lastQuestion);
+  else if (type === 'skipCount') showSkipCount();
+  else if (type === 'placeValue') showPlaceValue(state.lastQuestion);
+  else if (type === 'placeValueReverse') showPlaceValueReverse(state.lastQuestion);
+  else if (type === 'placeValueDifferent') showPlaceValueDifferent(state.lastQuestion);
+  else if (type === 'nearestTen') showNearestTen(state.lastQuestion);
+  else if (type === 'compare') showCompare();
+  else if (type === 'orderNumbers') showOrderNumbers();
+  else if (type === 'findPattern') showFindPattern();
+  else if (type === 'readWord') showReadWord(state.lastQuestion);
+  else if (type === 'sightWord') showSightWord(state.lastQuestion);
+  else if (type === 'rhyming') showRhyming();
+  else if (type === 'phonics') showPhonics(state.lastQuestion);
+  else if (type === 'syllables') showSyllables(state.lastQuestion);
+  else if (type === 'letterSounds') showLetterSounds();
+  else if (type === 'addition') showAddition();
+  else if (type === 'subtraction') showSubtraction();
+  else if (type === 'mathWordProblem') showMathWordProblem();
+  else if (type === 'mathComparison') showMathComparison();
+  else if (type === 'timeTelling') showTimeTelling();
+  else if (type === 'dailyActivity') showDailyActivity();
+  else if (type === 'timeSequence') showTimeSequence();
+  else if (type === 'animalIdentification') showAnimalIdentification();
+  else if (type === 'animalHabitat') showAnimalHabitat();
+  else if (type === 'weatherPattern') showWeatherPattern();
 }
 
 function submitAnswer() {
-  const valRaw = answerInput.value.trim();
-  if (!valRaw) {
-    showTempMessage('Please type an answer!', 1000, 'hint');
-    return;
+  const userAnswer = answerInput.value.trim().toLowerCase();
+  const correctAnswer = currentAnswer.toLowerCase();
+  
+  if (userAnswer === correctAnswer) {
+    handleCorrect();
+  } else {
+    handleWrong(currentAnswer);
   }
-  
-  const val = valRaw.toLowerCase().replace(/\s+/g, ' ');
-  const correct = String(currentAnswer).toLowerCase().replace(/\s+/g, ' ');
-  
-  if (retryState === 'force') {
-    if (val === correct) return handleCorrect();
-    else {
-      showTempMessage(`Please type the correct answer: ${currentAnswer}`, 1500, 'hint');
-      return;
-    }
+}
+
+function submitChoice(choice) {
+  if (choice.toLowerCase() === currentAnswer.toLowerCase()) {
+    handleCorrect();
+  } else {
+    handleWrong(currentAnswer);
   }
-  
-  if (val === correct) return handleCorrect();
-  else return handleWrong(String(currentAnswer));
 }
 
 function handleCorrect() {
@@ -1492,7 +1516,6 @@ function handleCorrect() {
   state.streak++;
   state.dailyProgress++;
   
-  // Determine the question category
   const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
   const isMathQuestion = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(currentQuestionType);
   const isTimeQuestion = ['timeTelling', 'dailyActivity', 'timeSequence'].includes(currentQuestionType);
@@ -1511,12 +1534,10 @@ function handleCorrect() {
   } else if (isMathQuestion) {
     state.mathTotal++;
     
-    // Adjust difficulty based on performance
     if (['addition', 'subtraction'].includes(currentQuestionType)) {
       adjustMathDifficulty(currentQuestionType, true);
     }
     
-    // Track math achievements
     if (state.mathTotal === 10) unlockAchievement('math_rookie');
     if (state.mathTotal >= 100) unlockAchievement('math_master');
     if (state.mathStreak >= 10) unlockAchievement('quick_calculator');
@@ -1524,7 +1545,6 @@ function handleCorrect() {
       unlockAchievement('perfect_session');
     }
     
-    // Add to math mastered list
     if (!state.mathMastered.includes(state.lastQuestion)) {
       state.mathMastered.push(state.lastQuestion);
     }
@@ -1560,12 +1580,11 @@ function handleCorrect() {
     state.streak = 0;
   }
   
-  // Check daily goal
   if (state.dailyProgress >= state.dailyGoal) {
     showTempMessage(`🎯 Daily goal achieved! Great job!`, 3000, 'success');
   }
   
-  state.lastQuestion = null; // Clear question after correct answer
+  state.lastQuestion = null;
   retryState = null;
   save();
   
@@ -1581,10 +1600,9 @@ function handleCorrect() {
     state.streak = 0;
   }
   
-  // Team Rocket battle every 15 correct answers (combined)
   const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal + state.timeTotal + state.scienceTotal;
   if (totalAnswers > 0 && totalAnswers % 15 === 0) {
-    triggerRocketBattle();
+    startRocketBattle();
     return;
   }
   
@@ -1601,21 +1619,25 @@ function handleWrong(correct) {
   state.streak = 0;
   playSound('wrong');
   
-  // Track mistakes for number, reading, and math questions
   const isReadingQuestion = ['readWord', 'sightWord', 'rhyming', 'phonics', 'syllables', 'letterSounds'].includes(currentQuestionType);
   const isMathQuestion = ['addition', 'subtraction', 'mathWordProblem', 'mathComparison'].includes(currentQuestionType);
+  const isTimeQuestion = ['timeTelling', 'dailyActivity', 'timeSequence'].includes(currentQuestionType);
+  const isScienceQuestion = ['animalIdentification', 'animalHabitat', 'weatherPattern'].includes(currentQuestionType);
   
   if (isReadingQuestion) {
     state.readingMistakes[state.lastQuestion] = (state.readingMistakes[state.lastQuestion] || 0) + 1;
   } else if (isMathQuestion) {
     state.mathMistakes[state.lastQuestion] = (state.mathMistakes[state.lastQuestion] || 0) + 1;
     
-    // Adjust difficulty based on wrong answer
     if (['addition', 'subtraction'].includes(currentQuestionType)) {
       adjustMathDifficulty(currentQuestionType, false);
     }
     
     state.mathSessionTotal++;
+  } else if (isTimeQuestion) {
+    state.timeMistakes[state.lastQuestion] = (state.timeMistakes[state.lastQuestion] || 0) + 1;
+  } else if (isScienceQuestion) {
+    state.scienceMistakes[state.lastQuestion] = (state.scienceMistakes[state.lastQuestion] || 0) + 1;
   } else {
     state.mistakes[state.lastQuestion] = (state.mistakes[state.lastQuestion] || 0) + 1;
   }
@@ -1640,370 +1662,73 @@ function handleWrong(correct) {
   }
 }
 
-// ========== ENCOUNTERS & CATCHING ==========
-function maybeEncounter() {
-  const chance = 0.35;
-  if (Math.random() > chance) return;
+function showHint() {
+  if (!state.hints) return;
   
-  if (state.stolen.length > 0 && Math.random() < 0.4) {
-    const stolenId = state.stolen[Math.floor(Math.random() * state.stolen.length)];
-    const crit = creatures.find(c => c.id === stolenId);
-    if (crit) return spawnEncounter(crit, true);
-  }
+  let hint = '';
   
-  const crit = pickWeightedCreature();
-  if (getRarity(crit.index) === 'legendary') {
-    if (!state.milestones.includes('legendary-' + crit.index) && Math.random() > 0.15) return;
-  }
-  spawnEncounter(crit, false);
-}
-
-function spawnEncounter(crit, isStolen = false) {
-  encounterArea.innerHTML = '';
-  const wrap = document.createElement('div');
-  wrap.className = 'creature-popup';
-  wrap.innerHTML = `<div class="center"><img src="${crit.img}" class="creature-img" alt="${crit.name}"></div>
-    <div class="small center">${isStolen ? 'A stolen' : 'A wild'} <strong>${crit.name}</strong> appeared!</div>
-    <div class="small-muted center">Rarity: ${getRarity(crit.index)}</div>`;
-  
-  const btnCatch = document.createElement('button');
-  btnCatch.textContent = '⚡ Catch!';
-  btnCatch.className = 'secondary';
-  
-  const btnRun = document.createElement('button');
-  btnRun.textContent = '🏃 Let it go';
-  
-  wrap.appendChild(btnCatch);
-  wrap.appendChild(btnRun);
-  encounterArea.appendChild(wrap);
-
-  let resolved = false;
-  const timeout = setTimeout(() => {
-    if (resolved) return;
-    resolved = true;
-    encounterArea.innerHTML = `<div class="small center">Oh no — ${crit.name} got away!</div>`;
-    setTimeout(() => {
-      encounterArea.innerHTML = '';
-      nextQuestion();
-    }, 900);
-  }, 5000);
-
-  btnCatch.onclick = () => {
-    if (resolved) return;
-    resolved = true;
-    clearTimeout(timeout);
-    const chance = getCatchChance(crit.index);
-    const success = Math.random() < chance;
-    
-    if (success) {
-      if (isStolen) {
-        const idx = state.stolen.indexOf(crit.id);
-        if (idx >= 0) state.stolen.splice(idx, 1);
-        addToCollection(crit.id);
-        encounterArea.innerHTML = `<div class="small center">🎉 You recaught <strong>${crit.name}</strong>!</div>`;
-      } else {
-        addToCollection(crit.id);
-        encounterArea.innerHTML = `<div class="small center">🎉 You caught <strong>${crit.name}</strong>!</div>`;
-        if (getRarity(crit.index) === 'legendary') {
-          state.milestones.push('legendary-' + crit.index);
-        }
-      }
-      save();
-      setTimeout(() => {
-        encounterArea.innerHTML = '';
-        nextQuestion();
-      }, 1200);
+  if (currentQuestionType === 'spellTiles') {
+    hint = `The word starts with "${currentAnswer[0]}" and has ${currentAnswer.replace(/[\s-]/g, '').length} letters.`;
+  } else if (currentQuestionType === 'countForward') {
+    hint = `When counting up, the next number after ${state.lastQuestion} is ${state.lastQuestion + 1}.`;
+  } else if (currentQuestionType === 'countBackward') {
+    hint = `When counting down, the number before ${state.lastQuestion} is ${state.lastQuestion - 1}.`;
+  } else if (currentQuestionType === 'readWord') {
+    hint = `Try sounding out each letter: ${state.lastQuestion.split('').join('-')}`;
+  } else if (currentQuestionType === 'sightWord') {
+    hint = `This is a common word that starts with "${currentAnswer[0]}".`;
+  } else if (currentQuestionType === 'phonics') {
+    hint = `Listen carefully to each sound and put them together.`;
+  } else if (currentQuestionType === 'addition') {
+    const parts = state.lastQuestion.split('+');
+    const num1 = parseInt(parts[0]);
+    const num2 = parseInt(parts[1]);
+    hint = `Try counting up from ${num1}. Add ${num2} more: ${num1} + 1 = ${num1 + 1}, then keep going!`;
+  } else if (currentQuestionType === 'subtraction') {
+    const parts = state.lastQuestion.split('-');
+    const num1 = parseInt(parts[0]);
+    const num2 = parseInt(parts[1]);
+    hint = `Start with ${num1} and count backwards ${num2} times. Or think: what plus ${num2} equals ${num1}?`;
+  } else if (currentQuestionType === 'mathWordProblem') {
+    if (state.lastQuestion.includes('+')) {
+      hint = `This is an addition problem. Look for words like "more", "total", "altogether", or "join".`;
     } else {
-      encounterArea.innerHTML = `<div class="small center">💨 Oh no — ${crit.name} escaped!</div>`;
-      setTimeout(() => {
-        encounterArea.innerHTML = '';
-        nextQuestion();
-      }, 900);
+      hint = `This is a subtraction problem. Look for words like "left", "gave away", "lost", or "ate".`;
     }
-  };
-
-  btnRun.onclick = () => {
-    if (resolved) return;
-    resolved = true;
-    clearTimeout(timeout);
-    encounterArea.innerHTML = `<div class="small center">👋 You let ${crit.name} go.</div>`;
-    setTimeout(() => {
-      encounterArea.innerHTML = '';
-      nextQuestion();
-    }, 700);
-  };
-}
-
-function addToCollection(id) {
-  if (!state.collection.includes(id)) {
-    state.collection.push(id);
-    
-    if (state.collection.length === 1) unlockAchievement('first_catch');
-    if (state.collection.length >= 50) unlockAchievement('collector_50');
-    
-    const crit = creatures.find(c => c.id === id);
-    if (crit && LEGENDARIES.has(crit.index)) {
-      unlockAchievement('legendary_trainer');
+  } else if (currentQuestionType === 'timeTelling') {
+    hint = `Look at where the short hand (hour) and long hand (minute) point on the clock.`;
+  } else if (currentQuestionType === 'nearestTen') {
+    const n = state.lastQuestion;
+    const mod = n % 10;
+    if (mod < 5) {
+      hint = `${n} is closer to ${n - mod} because ${mod} is less than 5.`;
+    } else {
+      hint = `${n} is closer to ${n + (10 - mod)} because ${mod} is 5 or more.`;
     }
-    
-    if (state.collection.length === creatures.length) {
-      unlockAchievement('dex_complete');
-    }
-    
-    save();
-    updateCollectionBar();
   } else {
-    showTempMessage('You already have that one!', 900, 'hint');
-  }
-}
-
-function updateCollectionBar() {
-  collectionBar.innerHTML = '';
-  state.collection.forEach(cid => {
-    const c = creatures.find(x => x.id === cid);
-    if (!c) return;
-    const el = document.createElement('div');
-    el.className = 'collection-creature';
-    el.title = c.name;
-    el.innerHTML = `<img src="${c.img}" alt="${c.name}"><div class="small-muted">${c.name}</div>`;
-    collectionBar.appendChild(el);
-  });
-}
-
-// ========== EGGS & HATCHING ==========
-function giveEgg() {
-  const minutes = 2 + Math.floor(Math.random() * 4);
-  const hatchTime = Date.now() + minutes * 60 * 1000;
-  const egg = { id: `egg${Date.now()}`, hatchTime, critId: pickWeightedCreature().id };
-  state.eggs.push(egg);
-  save();
-  showTempMessage('An egg has been added to your collection! 🥚', 2000, 'hint');
-  if (state.eggs.length >= 10) unlockAchievement('egg_collector');
-  renderEggs();
-}
-
-function renderEggs() {
-  eggsBar.innerHTML = '';
-  state.eggs.forEach(egg => {
-    const eggEl = document.createElement('div');
-    eggEl.className = 'egg';
-    const secondsLeft = Math.floor((egg.hatchTime - Date.now()) / 1000);
-    const minutesLeft = Math.ceil(secondsLeft / 60);
-    eggEl.innerHTML = `🐣<div class="egg-timer">${minutesLeft} min</div>`;
-    eggsBar.appendChild(eggEl);
-  });
-}
-
-function checkEggs() {
-  const now = Date.now();
-  const hatchedEggs = state.eggs.filter(e => now >= e.hatchTime);
-  const remainingEggs = state.eggs.filter(e => now < e.hatchTime);
-  state.eggs = remainingEggs;
-
-  hatchedEggs.forEach(egg => {
-    state.hatched.push(egg.critId);
-    addToCollection(egg.critId);
-    const crit = creatures.find(c => c.id === egg.critId);
-    if (crit) {
-      showTempMessage(`🎉 Your egg hatched a ${crit.name}!`, 3000, 'success');
-      unlockAchievement('egg_hatcher');
-    }
-  });
-
-  if (hatchedEggs.length > 0) {
-    save();
-    renderEggs();
-    updateCollectionBar();
-  }
-}
-
-// ========== EVOLUTION & TEAM ROCKET ==========
-function triggerEvolution() {
-  const potentialEvo = state.collection.find(cid => {
-    const crit = creatures.find(c => c.id === cid);
-    if (crit && crit.index < 100 && (crit.index % 10 === 0)) return true;
-    return false;
-  });
-  
-  if (potentialEvo) {
-    const crit = creatures.find(c => c.id === potentialEvo);
-    const nextCrit = creatures.find(c => c.index === crit.index + 1);
-    if (nextCrit) {
-      state.collection = state.collection.filter(id => id !== crit.id);
-      addToCollection(nextCrit.id);
-      showTempMessage(`✨ ${crit.name} evolved into ${nextCrit.name}!`, 2500, 'success');
-    }
-  }
-}
-
-let rocketBattleCorrect = 0;
-let rocketBattleTotal = 3;
-let rocketQuestions = [];
-
-function triggerRocketBattle() {
-  showScreen('rocketBattle');
-  
-  // Generate 3 challenging questions for the rocket battle
-  rocketQuestions = [
-    { question: 'Spell: one hundred fifty', answer: 'one hundred fifty' },
-    { question: 'What comes after 199?', answer: '200' },
-    { question: 'Spell: ninety-nine', answer: 'ninety-nine' }
-  ];
-  
-  rocketBattleCorrect = 0;
-  updateRocketQuestion();
-}
-
-function updateRocketQuestion() {
-  if (rocketBattleCorrect >= rocketBattleTotal) {
-    handleRocketVictory();
-    return;
+    hint = `Think about what you know about this type of problem.`;
   }
   
-  const currentQ = rocketQuestions[rocketBattleCorrect];
-  document.getElementById('rocketQuestion').textContent = currentQ.question;
-  document.getElementById('rocketFeedback').textContent = '';
-  document.getElementById('rocketProgress').textContent = `${rocketBattleCorrect}/${rocketBattleTotal}`;
-  
-  const rocketOptions = document.getElementById('rocketOptions');
-  rocketOptions.innerHTML = '';
-  
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'Type your answer';
-  input.id = 'rocketAnswerInput';
-  input.style.width = '300px';
-  input.style.fontSize = '1.1rem';
-  
-  const btn = document.createElement('button');
-  btn.textContent = 'Submit Answer';
-  btn.onclick = submitRocketAnswer;
-  
-  input.onkeydown = (e) => {
-    if (e.key === 'Enter') submitRocketAnswer();
+  showTempMessage(`💡 Hint: ${hint}`, 4000, 'hint');
+}
+
+function updateStats() {
+  const modeNames = {
+    'numbers': 'Numbers Only',
+    'reading': 'Reading Only',
+    'math': 'Math Only',
+    'time': 'Time Skills',
+    'science': 'Science & Nature',
+    'mixed': 'Mixed Learning'
   };
-  
-  rocketOptions.appendChild(input);
-  rocketOptions.appendChild(btn);
-  
-  // Focus the input
-  setTimeout(() => input.focus(), 100);
-  
-  speak(currentQ.question);
-}
-
-function submitRocketAnswer() {
-  const input = document.getElementById('rocketAnswerInput');
-  const answer = input.value.trim().toLowerCase();
-  const correctAnswer = rocketQuestions[rocketBattleCorrect].answer.toLowerCase();
-  
-  if (answer === correctAnswer) {
-    rocketBattleCorrect++;
-    document.getElementById('rocketFeedback').textContent = `Correct! ${rocketBattleTotal - rocketBattleCorrect} more to go!`;
-    document.getElementById('rocketFeedback').className = 'small center feedback-success';
-    
-    setTimeout(() => {
-      updateRocketQuestion();
-    }, 1500);
-  } else {
-    document.getElementById('rocketFeedback').textContent = `Not quite right. Try again!`;
-    document.getElementById('rocketFeedback').className = 'small center feedback-error';
-    input.value = '';
-    input.focus();
-  }
-}
-
-function handleRocketVictory() {
-  state.rocketWins++;
-  if (state.rocketWins >= 5) unlockAchievement('rocket_defeated');
-  
-  showScreen('victory');
-  document.getElementById('victoryMessage').textContent = `🎉 You defeated Team Rocket! This is victory #${state.rocketWins}!`;
-  
-  const rewards = document.getElementById('victoryRewards');
-  rewards.innerHTML = '<h3>Rewards:</h3>';
-  
-  // Give rewards
-  const rewardCount = 2 + Math.floor(Math.random() * 3);
-  for (let i = 0; i < rewardCount; i++) {
-    const creature = pickWeightedCreature();
-    addToCollection(creature.id);
-    rewards.innerHTML += `<p>🎁 Caught ${creature.name}!</p>`;
-  }
-  
-  // Sometimes steal a creature (but not if they only have a few)
-  if (state.collection.length > 5 && Math.random() < 0.3) {
-    const stolenCreature = state.collection[Math.floor(Math.random() * state.collection.length)];
-    state.stolen.push(stolenCreature);
-    state.collection = state.collection.filter(c => c !== stolenCreature);
-    const crit = creatures.find(c => c.id === stolenCreature);
-    rewards.innerHTML += `<p style="color: #ef4444;">😈 Team Rocket stole your ${crit.name}!</p>`;
-  }
-  
-  save();
-  updateCollectionBar();
-}
-
-// ========== SCREENS & NAVIGATION ==========
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(el => el.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
-  
-  if (id === 'game') {
-    updateCollectionBar();
-    renderEggs();
-    renderAchievements();
-    updateStats();
-  }
-  if (id === 'map') renderMap();
-  if (id === 'dex') renderDex();
-  if (id === 'analytics') renderAnalytics();
-}
-
-// ========== ANALYTICS & SETTINGS ==========
-function renderMap() {
-  const mapGrid = document.getElementById('mapGrid');
-  mapGrid.innerHTML = '';
-  for (let i = 1; i <= MAX_NUM; i++) {
-    const tile = document.createElement('div');
-    tile.className = 'map-tile';
-    tile.textContent = i;
-    if (state.mastered.includes(i)) {
-      tile.classList.add('completed');
-    } else if (state.mistakes[i] > 0) {
-      tile.classList.add('partial');
-    }
-    tile.title = `Number ${i}: ${state.mastered.includes(i) ? 'Mastered' : (state.mistakes[i] ? `${state.mistakes[i]} mistakes` : 'Not attempted')}`;
-    mapGrid.appendChild(tile);
-  }
-}
-
-function renderDex() {
-  const dexGrid = document.getElementById('dexGrid');
-  const dexProgress = document.getElementById('dexProgress');
-  
-  dexProgress.textContent = `${state.collection.length} / ${creatures.length} caught`;
-  
-  dexGrid.innerHTML = '';
-  creatures.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'dex-creature';
-    const isCaught = state.collection.includes(c.id);
-    if (!isCaught) el.classList.add('locked');
-    const rarity = getRarity(c.index);
-    el.classList.add(`dex-${rarity}`);
-    el.innerHTML = `
-      <img src="${isCaught ? c.img : 'https://placehold.co/50x50/333333/FFFFFF?text=?'}" alt="${isCaught ? c.name : '???'}">
-      <div>${isCaught ? c.name : '???'}</div>
-      <div class="small-muted">${rarity}</div>
-    `;
-    dexGrid.appendChild(el);
-  });
+  difficultyLabel.textContent = `${modeNames[state.gameMode] || 'Mixed Learning'} (Grade ${state.gradeLevel})`;
+  streakLabel.textContent = state.streak;
+  totalLabel.textContent = state.correctTotal + state.readingTotal + state.mathTotal + state.timeTotal + state.scienceTotal;
 }
 
 function renderAnalytics() {
   const content = document.getElementById('analyticsContent');
-  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal;
+  const totalAnswers = state.correctTotal + state.readingTotal + state.mathTotal + state.timeTotal + state.scienceTotal;
   
   content.innerHTML = `
     <h3>Overall Progress</h3>
@@ -2011,15 +1736,32 @@ function renderAnalytics() {
     <p>Number Questions: <strong>${state.correctTotal}</strong></p>
     <p>Reading Questions: <strong>${state.readingTotal}</strong></p>
     <p>Math Questions: <strong>${state.mathTotal}</strong></p>
+    <p>Time Questions: <strong>${state.timeTotal}</strong></p>
+    <p>Science Questions: <strong>${state.scienceTotal}</strong></p>
+    <p>Daily Progress: <strong>${state.dailyProgress} / ${state.dailyGoal}</strong></p>
+    <div class="daily-progress">
+      <span>Today's Goal:</span>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: ${Math.min(100, (state.dailyProgress / state.dailyGoal) * 100)}%"></div>
+      </div>
+      <span>${Math.round((state.dailyProgress / state.dailyGoal) * 100)}%</span>
+    </div>
+    <hr style="margin:20px 0; border: none; border-top: 1px dashed #ccc;">
+    <h3>Skill Levels</h3>
+    <p>Addition Level: <strong>${state.additionLevel} / 5</strong></p>
+    <p>Subtraction Level: <strong>${state.subtractionLevel} / 5</strong></p>
+    <p>Time Level: <strong>${state.timeLevel} / 5</strong></p>
     <p>Mastered Numbers: <strong>${state.mastered.length} / ${MAX_NUM}</strong></p>
     <p>Reading Words Mastered: <strong>${state.readingMastered.length}</strong></p>
     <p>Math Problems Mastered: <strong>${state.mathMastered.length}</strong></p>
-    <p>Addition Level: <strong>${state.additionLevel} / 5</strong></p>
-    <p>Subtraction Level: <strong>${state.subtractionLevel} / 5</strong></p>
+    <p>Time Skills Mastered: <strong>${state.timeMastered.length}</strong></p>
+    <p>Science Facts Mastered: <strong>${state.scienceMastered.length}</strong></p>
+    <hr style="margin:20px 0; border: none; border-top: 1px dashed #ccc;">
+    <h3>Collection & Rewards</h3>
     <p>Pokédex Completion: <strong>${state.collection.length} / ${creatures.length}</strong></p>
     <p>Team Rocket Wins: <strong>${state.rocketWins}</strong></p>
     <p>Eggs Collected: <strong>${state.hatched.length + state.eggs.length}</strong></p>
-    <p>Phonics Challenges: <strong>${state.phonicsCompleted}</strong></p>
+    <p>Achievements Unlocked: <strong>${Object.keys(state.achievementsUnlocked).length} / ${Object.keys(achievements).length}</strong></p>
     <hr style="margin:20px 0; border: none; border-top: 1px dashed #ccc;">
     <h3>Areas for Practice</h3>
     <ul id="mistakesList"></ul>
@@ -2029,22 +1771,32 @@ function renderAnalytics() {
   const numberMistakes = Object.entries(state.mistakes).sort(([, a], [, b]) => b - a);
   const readingMistakes = Object.entries(state.readingMistakes).sort(([, a], [, b]) => b - a);
   const mathMistakes = Object.entries(state.mathMistakes).sort(([, a], [, b]) => b - a);
+  const timeMistakes = Object.entries(state.timeMistakes || {}).sort(([, a], [, b]) => b - a);
+  const scienceMistakes = Object.entries(state.scienceMistakes || {}).sort(([, a], [, b]) => b - a);
   
-  if (numberMistakes.length === 0 && readingMistakes.length === 0 && mathMistakes.length === 0) {
-    mistakesList.innerHTML = '<li>No mistakes yet - great job!</li>';
+  const hasAnyMistakes = numberMistakes.length > 0 || readingMistakes.length > 0 || 
+                       mathMistakes.length > 0 || timeMistakes.length > 0 || scienceMistakes.length > 0;
+  
+  if (!hasAnyMistakes) {
+    mistakesList.innerHTML = '<li>No mistakes yet - excellent work!</li>';
   } else {
-    mistakesList.innerHTML = '<h4>Numbers needing practice:</h4>';
-    numberMistakes.slice(0, 3).forEach(([num, count]) => {
-      const li = document.createElement('li');
-      li.textContent = `${num}: ${count} mistakes`;
-      mistakesList.appendChild(li);
-    });
+    mistakesList.innerHTML = '';
+    
+    if (numberMistakes.length > 0) {
+      const numberHeader = document.createElement('h4');
+      numberHeader.textContent = 'Numbers needing practice:';
+      mistakesList.appendChild(numberHeader);
+      numberMistakes.slice(0, 3).forEach(([num, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${num}: ${count} mistakes`;
+        mistakesList.appendChild(li);
+      });
+    }
     
     if (readingMistakes.length > 0) {
       const readingHeader = document.createElement('h4');
       readingHeader.textContent = 'Reading words needing practice:';
       mistakesList.appendChild(readingHeader);
-      
       readingMistakes.slice(0, 3).forEach(([word, count]) => {
         const li = document.createElement('li');
         li.textContent = `${word}: ${count} mistakes`;
@@ -2056,10 +1808,31 @@ function renderAnalytics() {
       const mathHeader = document.createElement('h4');
       mathHeader.textContent = 'Math problems needing practice:';
       mistakesList.appendChild(mathHeader);
-      
       mathMistakes.slice(0, 3).forEach(([problem, count]) => {
         const li = document.createElement('li');
         li.textContent = `${problem}: ${count} mistakes`;
+        mistakesList.appendChild(li);
+      });
+    }
+    
+    if (timeMistakes.length > 0) {
+      const timeHeader = document.createElement('h4');
+      timeHeader.textContent = 'Time skills needing practice:';
+      mistakesList.appendChild(timeHeader);
+      timeMistakes.slice(0, 3).forEach(([time, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${time}: ${count} mistakes`;
+        mistakesList.appendChild(li);
+      });
+    }
+    
+    if (scienceMistakes.length > 0) {
+      const scienceHeader = document.createElement('h4');
+      scienceHeader.textContent = 'Science topics needing practice:';
+      mistakesList.appendChild(scienceHeader);
+      scienceMistakes.slice(0, 3).forEach(([topic, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${topic}: ${count} mistakes`;
         mistakesList.appendChild(li);
       });
     }
@@ -2069,72 +1842,219 @@ function renderAnalytics() {
   hintsToggle.checked = state.hints;
 }
 
-function renderAchievements() {
-  const list = document.getElementById('achievementsList');
-  list.innerHTML = '';
-  const unlocked = Object.keys(state.achievementsUnlocked).length;
-  if (unlocked === 0) {
-    list.textContent = 'No achievements unlocked yet.';
-    return;
-  }
-  Object.keys(achievements).forEach(key => {
-    if (state.achievementsUnlocked[key]) {
-      const span = document.createElement('span');
-      span.textContent = `🏆 ${achievements[key].name}`;
-      span.style.margin = '0 5px';
-      span.title = achievements[key].description;
-      list.appendChild(span);
+// Simple Pokemon encounter system
+function maybeEncounter() {
+  if (Math.random() < 0.3) {
+    const available = creatures.filter(c => !state.collection.includes(c.name));
+    if (available.length > 0) {
+      const creature = available[Math.floor(Math.random() * available.length)];
+      showEncounter(creature);
     }
-  });
+  }
 }
 
-function resetGame() {
-  if (confirm("Are you sure you want to reset all progress? This cannot be undone!")) {
-    localStorage.removeItem(STORAGE_KEY);
-    state = {
-      gameMode: 'mixed',
-      difficulty: 1,
-      streak: 0,
-      mastered: [],
-      readingMastered: [],
-      mistakes: {},
-      readingMistakes: {},
-      collection: [],
-      stolen: [],
-      lastQuestion: null,
-      correctTotal: 0,
-      readingTotal: 0,
-      sound: true,
-      hints: true,
-      milestones: [],
-      achievementsUnlocked: {},
-      eggs: [],
-      hatched: [],
-      rocketWins: 0,
-      phonicsCompleted: 0
-    };
+function showEncounter(creature) {
+  state.collection.push(creature.name);
+  save();
+  
+  encounterArea.innerHTML = `
+    <div class="encounter">
+      <h3>A wild ${creature.name} appeared!</h3>
+      <div class="creature-display">
+        <span class="creature-emoji">${creature.emoji}</span>
+        <p><strong>${creature.name}</strong></p>
+        <p class="creature-type">${creature.type} type</p>
+        <p class="creature-desc">${creature.description}</p>
+        <p class="creature-rarity">${creature.rarity}</p>
+      </div>
+    </div>
+  `;
+  
+  if (state.collection.length === 1) unlockAchievement('first_catch');
+  if (state.collection.length >= 50) unlockAchievement('collector_50');
+  if (creature.rarity === 'legendary') unlockAchievement('legendary_trainer');
+  if (state.collection.length === creatures.length) unlockAchievement('dex_complete');
+  
+  updateCollectionBar();
+  
+  setTimeout(() => {
+    encounterArea.innerHTML = '';
+    continueBtn.style.display = 'inline-block';
+  }, 3000);
+}
+
+function updateCollectionBar() {
+  const recent = state.collection.slice(-10);
+  document.getElementById('collectionBar').innerHTML = recent.map(name => {
+    const creature = creatures.find(c => c.name === name);
+    return `<span class="pokemon ${creature.rarity}" title="${creature.name}">${creature.emoji}</span>`;
+  }).join('');
+}
+
+function renderAchievements() {
+  const recentAchievements = Object.keys(state.achievementsUnlocked).slice(-3);
+  document.getElementById('achievementsList').innerHTML = recentAchievements.map(id => 
+    `<span class="achievement">${achievements[id].name}</span>`
+  ).join('');
+}
+
+function giveEgg() {
+  const eggTypes = ['🥚', '🐣', '🐤', '🐥'];
+  const egg = {
+    type: eggTypes[Math.floor(Math.random() * eggTypes.length)],
+    hatchTime: Date.now() + (30000 + Math.random() * 60000)
+  };
+  state.eggs.push(egg);
+  save();
+  
+  if (state.eggs.length === 1) unlockAchievement('egg_hatcher');
+  if (state.eggs.length + state.hatched.length >= 10) unlockAchievement('egg_collector');
+  
+  renderEggs();
+}
+
+function renderEggs() {
+  document.getElementById('eggsBar').innerHTML = state.eggs.map((egg, i) => 
+    `<span class="egg" onclick="checkEgg(${i})" title="Click to check">${egg.type}</span>`
+  ).join('');
+}
+
+function checkEgg(index) {
+  const egg = state.eggs[index];
+  if (Date.now() >= egg.hatchTime) {
+    const creature = creatures[Math.floor(Math.random() * creatures.length)];
+    state.hatched.push(creature.name);
+    state.eggs.splice(index, 1);
+    
+    showTempMessage(`🎉 Your egg hatched into ${creature.name}! ${creature.emoji}`, 3000, 'success');
+    
+    if (!state.collection.includes(creature.name)) {
+      state.collection.push(creature.name);
+    }
+    
     save();
-    showTempMessage('All progress has been reset!', 2000, 'error');
-    showScreen('menu');
+    renderEggs();
+    updateCollectionBar();
+  } else {
+    const timeLeft = Math.ceil((egg.hatchTime - Date.now()) / 1000);
+    showTempMessage(`Egg will hatch in ${timeLeft} seconds`, 2000, 'hint');
   }
+}
+
+function checkEggs() {
+  let anyHatched = false;
+  state.eggs.forEach((egg, i) => {
+    if (Date.now() >= egg.hatchTime) {
+      anyHatched = true;
+    }
+  });
+  
+  if (anyHatched) {
+    renderEggs();
+  }
+}
+
+function triggerEvolution() {
+  showTempMessage('🌟 Great streak! Your Pokémon are getting stronger!', 2000, 'success');
+}
+
+function quitToMenu() {
+  state.lastQuestion = null;
+  retryState = null;
+  currentQuestionType = null;
+  
+  if (gameTimerInterval) {
+    clearInterval(gameTimerInterval);
+    gameTimerInterval = null;
+  }
+  
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'small center';
+  encounterArea.innerHTML = '';
+  continueBtn.style.display = 'none';
+  inputRow.style.display = 'none';
+  hintBtn.style.display = 'none';
+  optEl.innerHTML = '';
+  
+  save();
+  showScreen('menu');
+}
+
+function renderProgressMap() {
+  const gradeContent = getGradeContent();
+  const mapGrid = document.getElementById('mapGrid');
+  mapGrid.innerHTML = '';
+  
+  for (let i = gradeContent.numbers.min; i <= gradeContent.numbers.max; i++) {
+    const item = document.createElement('div');
+    item.className = 'map-item';
+    item.textContent = i;
+    
+    if (state.mastered.includes(i)) {
+      item.classList.add('completed');
+    } else if (state.mistakes[i]) {
+      item.classList.add('partial');
+    } else {
+      item.classList.add('locked');
+    }
+    
+    mapGrid.appendChild(item);
+  }
+}
+
+function renderPokedex() {
+  const dexGrid = document.getElementById('dexGrid');
+  const progress = document.getElementById('dexProgress');
+  
+  progress.textContent = `${state.collection.length} / ${creatures.length} caught`;
+  
+  dexGrid.innerHTML = creatures.map(creature => {
+    const caught = state.collection.includes(creature.name);
+    return `
+      <div class="dex-item ${caught ? 'caught' : ''} ${creature.rarity === 'legendary' ? 'legendary' : ''}">
+        <div class="dex-pokemon">${caught ? creature.emoji : '❓'}</div>
+        <div class="dex-name">${caught ? creature.name : '???'}</div>
+        <div class="dex-number">#${creatures.indexOf(creature) + 1}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ========== EVENT LISTENERS ==========
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', () => {
+  load();
   showScreen('menu');
+  updateCollectionBar();
+  renderAchievements();
+  renderEggs();
+  updateModeButtons();
+  updateGradeButtons();
   
-  // Settings
-  soundToggle.checked = state.sound;
-  soundToggle.addEventListener('change', (e) => {
-    state.sound = e.target.checked;
-    save();
-  });
+  gameTimerInterval = setInterval(checkEggs, 1000);
+
+  // Grade level selection
+  const gradeDescriptions = {
+    1: 'Grade 1: Numbers 1-20, simple addition, basic sight words, telling time to the hour',
+    2: 'Grade 2: Numbers 1-50, addition to 50, more sight words, half past and quarter past',
+    3: 'Grade 3: Numbers 1-100, addition to 100, longer words, digital time and schedules',
+    4: 'Grade 4: Numbers 1-150, addition to 150, complex words, time zones and calendars',
+    5: 'Grade 5: Numbers 1-200, addition to 200, advanced vocabulary, time calculations',
+    6: 'Grade 6: Numbers 1-200, advanced math, complex reading, world time and science'
+  };
   
-  hintsToggle.checked = state.hints;
-  hintsToggle.addEventListener('change', (e) => {
-    state.hints = e.target.checked;
-    save();
-  });
+  function updateGradeButtons() {
+    document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`grade${state.gradeLevel}`).classList.add('active');
+    document.getElementById('gradeDescription').textContent = gradeDescriptions[state.gradeLevel];
+  }
+  
+  for (let i = 1; i <= 6; i++) {
+    document.getElementById(`grade${i}`).onclick = () => {
+      state.gradeLevel = i;
+      updateGradeButtons();
+      save();
+    };
+  }
   
   // Game mode selection
   document.getElementById('numbersMode').onclick = () => {
@@ -2173,43 +2093,65 @@ window.onload = function() {
     save();
   };
   
-  // Navigation
-  document.getElementById('playBtn').onclick = startGame;
-  document.getElementById('mapBtn').onclick = () => showScreen('map');
-  document.getElementById('dexBtn').onclick = () => showScreen('dex');
-  document.getElementById('analyticsBtn').onclick = () => showScreen('analytics');
+  // Screen navigation
+  document.getElementById('playBtn').onclick = () => {
+    showScreen('game');
+    updateStats();
+    nextQuestion();
+  };
+  
+  document.getElementById('mapBtn').onclick = () => {
+    renderProgressMap();
+    showScreen('map');
+  };
+  
+  document.getElementById('dexBtn').onclick = () => {
+    renderPokedex();
+    showScreen('dex');
+  };
+  
+  document.getElementById('analyticsBtn').onclick = () => {
+    renderAnalytics();
+    showScreen('analytics');
+  };
+  
   document.getElementById('backFromMap').onclick = () => showScreen('menu');
   document.getElementById('backFromDex').onclick = () => showScreen('menu');
   document.getElementById('backFromAnalytics').onclick = () => showScreen('menu');
-  document.getElementById('quitBtn').onclick = quitToMenu;
-  document.getElementById('resetBtn').onclick = resetGame;
   
   // Game controls
-  document.getElementById('submitBtn').onclick = submitAnswer;
-  document.getElementById('answerInput').onkeydown = (e) => {
-    if (e.key === 'Enter') submitAnswer();
-  };
+  document.getElementById('quitBtn').onclick = quitToMenu;
   document.getElementById('continueBtn').onclick = nextQuestion;
+  document.getElementById('submitBtn').onclick = submitAnswer;
   document.getElementById('hintBtn').onclick = showHint;
   
-  // Team Rocket controls
-  document.getElementById('forfeitRocket').onclick = () => {
-    showTempMessage('You gave up! Team Rocket wins this time!', 2000, 'error');
-    setTimeout(() => {
-      showScreen('game');
-      nextQuestion();
-    }, 1000);
-  };
-  
-  // Victory screen
+  // Team Rocket battle controls
+  document.getElementById('forfeitRocket').onclick = forfeitRocketBattle;
   document.getElementById('continueFromVictory').onclick = () => {
     showScreen('game');
     nextQuestion();
   };
   
+  // Settings
+  soundToggle.onchange = () => {
+    state.sound = soundToggle.checked;
+    save();
+  };
+  
+  hintsToggle.onchange = () => {
+    state.hints = hintsToggle.checked;
+    save();
+  };
+  
+  document.getElementById('resetBtn').onclick = () => {
+    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  };
+  
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    // Only handle shortcuts when not typing in input fields
     if (e.target.tagName === 'INPUT') return;
     
     if (e.key === ' ' && continueBtn.style.display !== 'none') {
@@ -2220,22 +2162,24 @@ window.onload = function() {
       e.preventDefault();
       showHint();
     }
-    // Add Enter key support for submit when input is focused
     if (e.key === 'Enter' && inputRow.style.display !== 'none') {
       e.preventDefault();
       submitAnswer();
     }
   });
   
-  updateCollectionBar();
-  renderAchievements();
-  renderEggs();
-  updateModeButtons();
-  
-  gameTimerInterval = setInterval(checkEggs, 1000);
-};
+  // Input handling
+  answerInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      submitAnswer();
+    }
+  });
+});
 
 function updateModeButtons() {
   document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById(state.gameMode + 'Mode').classList.add('active');
 }
+
+// Make checkEgg available globally for onclick handlers
+window.checkEgg = checkEgg;
