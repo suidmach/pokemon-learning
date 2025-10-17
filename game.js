@@ -554,21 +554,36 @@ function showSpellTiles(n, word) {
   selectedLetters = [];
   qEl.textContent = `Spell the number: ${n}`;
   
+  // Get all letters from the word, including spaces and hyphens for proper spelling
   const letters = word.split('').filter(c => c !== ' ' && c !== '-');
   const shuffled = [...letters].sort(() => Math.random() - 0.5);
   
-  optEl.innerHTML = '<div class="tile-display" id="tileDisplay">Click letters to spell the word</div><div class="tile-bank" id="tileBank"></div>';
-  const tileBank = document.getElementById('tileBank');
+  // Clear the options area and create the tile interface
+  optEl.innerHTML = '';
   
+  // Create display area
+  const tileDisplay = document.createElement('div');
+  tileDisplay.className = 'tile-display';
+  tileDisplay.id = 'tileDisplay';
+  tileDisplay.textContent = 'Click letters to spell the word';
+  optEl.appendChild(tileDisplay);
+  
+  // Create tile bank
+  const tileBank = document.createElement('div');
+  tileBank.className = 'tile-bank';
+  tileBank.id = 'tileBank';
+  
+  // Add letter tiles
   shuffled.forEach((letter, i) => {
     const tile = document.createElement('button');
-    tile.textContent = letter;
+    tile.textContent = letter.toUpperCase(); // Make sure letters are visible
     tile.className = 'letter-tile';
     tile.style.setProperty('--i', i);
     tile.onclick = () => selectLetter(letter, tile);
     tileBank.appendChild(tile);
   });
   
+  // Add control buttons
   const clearBtn = document.createElement('button');
   clearBtn.textContent = '↺ Clear';
   clearBtn.className = 'secondary';
@@ -579,6 +594,8 @@ function showSpellTiles(n, word) {
   submitBtn.textContent = '✓ Check';
   submitBtn.onclick = checkSpelling;
   tileBank.appendChild(submitBtn);
+  
+  optEl.appendChild(tileBank);
   
   speak(`Spell the number ${n}`);
   
