@@ -940,7 +940,106 @@ input[type="checkbox"] {
   transform: translateY(-2px);
 }
 
-/* Mobile Responsive Improvements */
+/* Math question styles */
+.math-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 30px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 3px solid var(--primary);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  color: var(--primary);
+  font-family: 'Courier New', monospace;
+  box-shadow: var(--shadow-lg);
+}
+
+.word-problem-display {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  text-align: center;
+  padding: 25px;
+  background: linear-gradient(135deg, #fefce8, #fef3c7);
+  border: 2px solid var(--accent);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  color: var(--text);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.math-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+  padding: 20px;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.math-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.math-expression {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+}
+
+.math-result {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+}
+
+.comparison-operator {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Mobile responsive math styles */
+@media (max-width: 768px) {
+  .math-display {
+    font-size: 2rem;
+    padding: 20px;
+  }
+  
+  .word-problem-display {
+    font-size: 1.1rem;
+    padding: 20px;
+  }
+  
+  .math-comparison {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .comparison-operator {
+    font-size: 2rem;
+    transform: rotate(90deg);
+  }
+  
+  .math-result {
+    font-size: 1.5rem;
+  }
+}
 @media (max-width: 768px) {
   .screen { padding: 15px; }
   h1 { font-size: 2rem; }
