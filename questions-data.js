@@ -295,38 +295,117 @@ function generateCompletionQuestion(word) {
 }
 
 function generateTimeReadingQuestion() {
-  const times = ['9:30', '2:15', '11:45', '6:00', '4:30', '8:15'];
-  const timeString = times[Math.floor(Math.random() * times.length)];
+  const gradeContent = getGradeContent();
+  const gradeLevel = state.gradeLevel;
+  
+  // Generate more complex times based on grade level
+  let hour, minutes, timeString;
+  
+  if (gradeLevel <= 2) {
+    // Grades 1-2: Hour and half-hour times
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = [0, 30][Math.floor(Math.random() * 2)];
+  } else if (gradeLevel <= 4) {
+    // Grades 3-4: Quarter hours and 5-minute intervals
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55][Math.floor(Math.random() * 12)];
+  } else {
+    // Grades 5-6: Any minute
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = Math.floor(Math.random() * 60);
+  }
+  
+  timeString = `${hour}:${minutes.toString().padStart(2, '0')}`;
   
   currentQuestion = {
     type: 'time',
+    hour: hour,
+    minutes: minutes,
     answer: timeString
   };
   
+  // Create analog clock display
   questionEl.innerHTML = `
-    <div class="time-sequence">${timeString}</div>
-    <div>What time is this?</div>
+    <div>What time does this clock show?</div>
+    <div class="clock-display">
+      <div class="analog-clock">
+        <div class="clock-face">
+          <div class="hour-12">12</div>
+          <div class="hour-1">1</div>
+          <div class="hour-2">2</div>
+          <div class="hour-3">3</div>
+          <div class="hour-4">4</div>
+          <div class="hour-5">5</div>
+          <div class="hour-6">6</div>
+          <div class="hour-7">7</div>
+          <div class="hour-8">8</div>
+          <div class="hour-9">9</div>
+          <div class="hour-10">10</div>
+          <div class="hour-11">11</div>
+          <div class="hour-hand" style="transform: rotate(${(hour % 12) * 30 + minutes * 0.5}deg)"></div>
+          <div class="minute-hand" style="transform: rotate(${minutes * 6}deg)"></div>
+          <div class="clock-center"></div>
+        </div>
+      </div>
+    </div>
   `;
   
-  speak(`What time is ${timeString}?`);
+  speak(`What time does this clock show?`);
   
-  const wrongTimes = [
-    timeString.replace(/30/, '15'),
-    timeString.replace(/15/, '45'),
-    timeString.replace(/00/, '30')
-  ].filter(t => t !== timeString);
+  // Generate realistic wrong answers
+  const wrongTimes = [];
   
-  const options = [timeString, ...wrongTimes.slice(0, 3)].sort(() => Math.random() - 0.5);
+  // Common mistakes: off by 5 minutes
+  if (minutes >= 5) wrongTimes.push(`${hour}:${(minutes - 5).toString().padStart(2, '0')}`);
+  if (minutes <= 55) wrongTimes.push(`${hour}:${(minutes + 5).toString().padStart(2, '0')}`);
+  
+  // Common mistakes: off by one hour
+  const wrongHour1 = hour === 12 ? 1 : hour + 1;
+  const wrongHour2 = hour === 1 ? 12 : hour - 1;
+  wrongTimes.push(`${wrongHour1}:${minutes.toString().padStart(2, '0')}`);
+  wrongTimes.push(`${wrongHour2}:${minutes.toString().padStart(2, '0')}`);
+  
+  // Common mistakes: confusing hour and minute hands
+  if (minutes <= 12) {
+    const confusedTime = `${minutes === 0 ? 12 : minutes}:${(hour * 5).toString().padStart(2, '0')}`;
+    if (confusedTime !== timeString) wrongTimes.push(confusedTime);
+  }
+  
+  const uniqueWrongTimes = [...new Set(wrongTimes)].filter(t => t !== timeString);
+  const options = [timeString, ...uniqueWrongTimes.slice(0, 3)].sort(() => Math.random() - 0.5);
   createOptionsButtons(options, timeString);
 }
 
 function generateTimeVocabularyQuestion() {
-  const concepts = [
-    { question: 'When do you eat breakfast?', answer: 'morning', options: ['morning', 'afternoon', 'evening', 'night'] },
-    { question: 'When do you go to bed?', answer: 'night', options: ['morning', 'afternoon', 'evening', 'night'] },
-    { question: 'When do you eat lunch?', answer: 'afternoon', options: ['morning', 'afternoon', 'evening', 'night'] },
-    { question: 'How many minutes in an hour?', answer: '60', options: ['60', '30', '24', '100'] }
-  ];
+  const gradeLevel = state.gradeLevel;
+  let concepts;
+  
+  if (gradeLevel <= 2) {
+    // Basic time concepts
+    concepts = [
+      { question: 'When do you eat breakfast?', answer: 'morning', options: ['morning', 'afternoon', 'evening', 'night'] },
+      { question: 'When do you go to bed?', answer: 'night', options: ['morning', 'afternoon', 'evening', 'night'] },
+      { question: 'When do you eat lunch?', answer: 'afternoon', options: ['morning', 'afternoon', 'evening', 'night'] },
+      { question: 'How many hours are in a day?', answer: '24', options: ['24', '12', '60', '30'] }
+    ];
+  } else if (gradeLevel <= 4) {
+    // More advanced concepts
+    concepts = [
+      { question: 'How many minutes are in an hour?', answer: '60', options: ['60', '30', '24', '100'] },
+      { question: 'How many seconds are in a minute?', answer: '60', options: ['60', '30', '100', '24'] },
+      { question: 'If it\'s 3:00 PM, what time is it in 2 hours?', answer: '5:00 PM', options: ['5:00 PM', '5:00 AM', '1:00 PM', '6:00 PM'] },
+      { question: 'What comes after 11:59 PM?', answer: '12:00 AM', options: ['12:00 AM', '12:00 PM', '1:00 PM', '11:60 PM'] },
+      { question: 'Which is longer: 90 minutes or 1 hour?', answer: '90 minutes', options: ['90 minutes', '1 hour', 'they are equal', 'impossible to tell'] }
+    ];
+  } else {
+    // Advanced time calculations
+    concepts = [
+      { question: 'If a movie starts at 7:25 PM and lasts 2 hours 15 minutes, when does it end?', answer: '9:40 PM', options: ['9:40 PM', '9:25 PM', '10:40 PM', '9:15 PM'] },
+      { question: 'How many minutes from 2:45 PM to 3:15 PM?', answer: '30 minutes', options: ['30 minutes', '45 minutes', '15 minutes', '25 minutes'] },
+      { question: 'If it\'s 10:30 AM in New York, what time is it in California (3 hours behind)?', answer: '7:30 AM', options: ['7:30 AM', '1:30 PM', '13:30 AM', '7:30 PM'] },
+      { question: 'Which is the correct way to write 2:05 PM in 24-hour format?', answer: '14:05', options: ['14:05', '2:05', '02:05', '26:05'] }
+    ];
+  }
   
   const concept = concepts[Math.floor(Math.random() * concepts.length)];
   
