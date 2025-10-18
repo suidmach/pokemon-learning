@@ -542,38 +542,54 @@ function handleAnswer(isCorrect) {
     // Clear encounter area first
     encounterArea.innerHTML = '';
     
-    // Enhanced Pokemon encounter system
-    let encounterChance = 0.5; // Increased base 50% chance
+    // Enhanced Pokemon encounter system - ALWAYS try to show something exciting!
+    let encounterChance = 0.4; // Good base 40% chance
     
     // Increase chance based on streak
+    if (state.streak >= 3) encounterChance += 0.2;
     if (state.streak >= 5) encounterChance += 0.2;
     if (state.streak >= 10) encounterChance += 0.2;
-    if (state.streak >= 20) encounterChance += 0.1;
     
-    // Guarantee encounter every 3 correct answers to prevent dry spells
-    const guaranteedEncounter = state.correctTotal % 3 === 0;
+    // Guarantee encounter every 2 correct answers to prevent dry spells
+    const guaranteedEncounter = state.correctTotal % 2 === 0;
     
     console.log(`Encounter check: Streak ${state.streak}, Total ${state.correctTotal}, Chance ${encounterChance}, Guaranteed ${guaranteedEncounter}`);
     
     if (guaranteedEncounter || Math.random() < encounterChance) {
       console.log('Pokemon encounter triggered!');
-      catchPokemon();
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        catchPokemon();
+      }, 100);
     } else {
       console.log('No Pokemon encounter this time');
+      // Even if no Pokemon, show encouraging message
+      setTimeout(() => {
+        if (encounterArea.innerHTML === '') {
+          encounterArea.innerHTML = `
+            <div class="pokemon-search">
+              <div>🔍 Looking for Pokemon...</div>
+              <div class="small">Keep answering correctly to find more!</div>
+            </div>
+          `;
+        }
+      }, 200);
     }
     
-    // Egg generation - 25% chance per correct answer (after Pokemon check)
-    if (Math.random() < 0.25 && state.eggs.length < 6) {
-      generateEgg();
-      // Add egg message below Pokemon encounter if any
-      const eggMessage = `
-        <div class="egg-find" style="margin-top: 10px;">
-          <div>🥚 You found a mysterious egg!</div>
-          <div class="small">It will hatch soon...</div>
-        </div>
-      `;
-      encounterArea.innerHTML += eggMessage;
-      speak('You found a mysterious egg!');
+    // Egg generation - 30% chance per correct answer (after Pokemon check)
+    if (Math.random() < 0.3 && state.eggs.length < 6) {
+      setTimeout(() => {
+        generateEgg();
+        // Add egg message below Pokemon encounter if any
+        const eggMessage = `
+          <div class="egg-find" style="margin-top: 10px;">
+            <div>🥚 You found a mysterious egg!</div>
+            <div class="small">It will hatch soon...</div>
+          </div>
+        `;
+        encounterArea.innerHTML += eggMessage;
+        speak('You found a mysterious egg!');
+      }, 300);
     }
     
     // Check for achievements
@@ -623,6 +639,17 @@ function catchPokemon() {
   console.log('Current collection size:', state.collection.length);
   console.log('Available creatures:', creatures.length);
   
+  if (!creatures || creatures.length === 0) {
+    console.error('ERROR: creatures array is not defined or empty!');
+    encounterArea.innerHTML = `
+      <div class="pokemon-encounter">
+        <div class="pokemon-caught">❌</div>
+        <div>Pokemon data not loaded!</div>
+      </div>
+    `;
+    return;
+  }
+  
   const availablePokemon = creatures.filter(c => !state.collection.includes(c.name));
   console.log('Available Pokemon count:', availablePokemon.length);
   
@@ -630,7 +657,7 @@ function catchPokemon() {
   if (availablePokemon.length === 0) {
     const allPokemon = creatures[Math.floor(Math.random() * creatures.length)];
     encounterArea.innerHTML = `
-      <div class="pokemon-encounter">
+      <div class="pokemon-encounter shiny-encounter">
         <div class="pokemon-caught">✨${allPokemon.emoji}✨</div>
         <div>Shiny ${allPokemon.name} appeared!</div>
         <div class="small">You already caught all Pokémon! This is a rare shiny variant!</div>
@@ -638,14 +665,15 @@ function catchPokemon() {
     `;
     speak(`Amazing! A shiny ${allPokemon.name} appeared!`);
     updateCollectionBar();
+    save();
     return;
   }
   
   // Determine rarity based on streak with better distribution
   let rarity = 'common';
-  if (state.streak >= 5) rarity = 'uncommon';
-  if (state.streak >= 15) rarity = 'rare';
-  if (state.streak >= 25) rarity = 'legendary';
+  if (state.streak >= 3) rarity = 'uncommon';
+  if (state.streak >= 10) rarity = 'rare';
+  if (state.streak >= 20) rarity = 'legendary';
   
   console.log('Target rarity:', rarity, 'for streak:', state.streak);
   
@@ -685,6 +713,9 @@ function catchPokemon() {
   } else if (pokemon.rarity === 'rare') {
     encounterMessage = `✨ RARE ENCOUNTER! You caught ${pokemon.name}! ✨`;
     extraClass = 'rare-encounter';
+  } else if (pokemon.rarity === 'uncommon') {
+    encounterMessage = `⭐ UNCOMMON ENCOUNTER! You caught ${pokemon.name}! ⭐`;
+    extraClass = 'uncommon-encounter';
   }
   
   const encounterHTML = `
@@ -707,6 +738,8 @@ function catchPokemon() {
   
   // Force a save to make sure progress is retained
   save();
+  
+  console.log('Pokemon encounter completed successfully');
 }
 
 function updateCollectionBar() {
@@ -786,33 +819,63 @@ function generateEgg() {
     random -= weights[i];
   }
   
+  // Shorter hatch times for better gameplay experience
+  const hatchTimes = {
+    'common': 60000,    // 1 minute
+    'uncommon': 120000, // 2 minutes  
+    'rare': 300000      // 5 minutes
+  };
+  
   const egg = {
-    id: Date.now(),
+    id: Date.now() + Math.random(), // Ensure unique ID
     type: eggType,
-    hatchTime: Date.now() + (eggType === 'common' ? 300000 : eggType === 'uncommon' ? 600000 : 1200000), // 5, 10, or 20 minutes
+    hatchTime: Date.now() + hatchTimes[eggType],
     progress: 0
   };
   
+  console.log('Generated egg:', egg);
+  
   state.eggs.push(egg);
   renderEggs();
+  save(); // Save immediately when egg is generated
 }
 
 function checkEggs() {
   const now = Date.now();
   const readyEggs = state.eggs.filter(egg => now >= egg.hatchTime);
   
+  // Hatch ready eggs
   readyEggs.forEach(egg => {
+    console.log('Hatching ready egg:', egg.id);
     hatchEgg(egg.id);
   });
   
   // Update progress for remaining eggs
   state.eggs.forEach(egg => {
-    const totalTime = egg.hatchTime - (egg.hatchTime - 300000); // Approximate based on type
-    const elapsed = now - (egg.hatchTime - totalTime);
+    const hatchTimes = {
+      'common': 60000,    // 1 minute
+      'uncommon': 120000, // 2 minutes  
+      'rare': 300000      // 5 minutes
+    };
+    
+    const totalTime = hatchTimes[egg.type] || 60000;
+    const startTime = egg.hatchTime - totalTime;
+    const elapsed = now - startTime;
     egg.progress = Math.min(100, Math.max(0, (elapsed / totalTime) * 100));
+    
+    // Debug logging
+    if (egg.progress > 90) {
+      console.log(`Egg ${egg.id} almost ready: ${egg.progress}%`);
+    }
   });
   
+  // Update eggs display
   renderEggs();
+  
+  // Auto-save occasionally to preserve egg progress
+  if (Math.random() < 0.1) { // 10% chance each check
+    save();
+  }
 }
 
 function hatchEgg(eggId) {
@@ -822,28 +885,85 @@ function hatchEgg(eggId) {
   const egg = state.eggs[eggIndex];
   state.eggs.splice(eggIndex, 1);
   
+  console.log('Hatching egg of type:', egg.type);
+  
   // Hatch a pokemon of the egg's rarity
   const availablePokemon = creatures.filter(c => 
     !state.collection.includes(c.name) && c.rarity === egg.type
   );
+  
+  console.log('Available Pokemon for hatching:', availablePokemon.length);
   
   if (availablePokemon.length > 0) {
     const pokemon = availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
     state.collection.push(pokemon.name);
     state.hatched.push(pokemon.name);
     
+    console.log('Hatched Pokemon:', pokemon.name);
+    
     encounterArea.innerHTML = `
       <div class="egg-hatch">
-        <div>🥚 ➡️ ${pokemon.emoji}</div>
+        <div class="hatch-animation">🥚 ➡️ ${pokemon.emoji}</div>
         <div>Your egg hatched into ${pokemon.name}!</div>
+        <div class="small">${pokemon.description}</div>
+        <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
       </div>
     `;
     
     speak(`Your egg hatched into ${pokemon.name}!`);
     updateCollectionBar();
+    
+    // Clear the hatch message after a few seconds
+    setTimeout(() => {
+      if (encounterArea.innerHTML.includes('egg-hatch')) {
+        encounterArea.innerHTML = '';
+      }
+    }, 6000);
+    
+  } else {
+    // If no Pokemon of that rarity available, try any available Pokemon
+    console.log('No Pokemon of egg rarity available, trying any available...');
+    const anyAvailable = creatures.filter(c => !state.collection.includes(c.name));
+    
+    if (anyAvailable.length > 0) {
+      const pokemon = anyAvailable[Math.floor(Math.random() * anyAvailable.length)];
+      state.collection.push(pokemon.name);
+      state.hatched.push(pokemon.name);
+      
+      console.log('Hatched any available Pokemon:', pokemon.name);
+      
+      encounterArea.innerHTML = `
+        <div class="egg-hatch">
+          <div class="hatch-animation">🥚 ➡️ ${pokemon.emoji}</div>
+          <div>Your egg hatched into ${pokemon.name}!</div>
+          <div class="small">${pokemon.description}</div>
+          <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
+        </div>
+      `;
+      
+      speak(`Your egg hatched into ${pokemon.name}!`);
+      updateCollectionBar();
+      
+      setTimeout(() => {
+        if (encounterArea.innerHTML.includes('egg-hatch')) {
+          encounterArea.innerHTML = '';
+        }
+      }, 6000);
+    } else {
+      // All Pokemon caught - give a special message
+      encounterArea.innerHTML = `
+        <div class="egg-hatch">
+          <div>🥚 ➡️ ✨</div>
+          <div>Your egg hatched into stardust!</div>
+          <div class="small">You've caught all available Pokemon!</div>
+        </div>
+      `;
+      speak('Your egg hatched into stardust! You have caught all Pokemon!');
+    }
   }
   
   renderEggs();
+  save(); // Important: Save progress after hatching
 }
 
 function renderEggs() {
@@ -911,12 +1031,49 @@ function showHint() {
   speak(hint);
 }
 
-// Test function for debugging - call from browser console
+// Test function for debugging - call from browser console or button
 function testPokemonEncounter() {
-  console.log('Testing Pokemon encounter...');
+  console.log('=== TESTING POKEMON ENCOUNTER ===');
+  console.log('Current state:');
+  console.log('- Streak:', state.streak);
+  console.log('- Total correct:', state.correctTotal);
+  console.log('- Collection size:', state.collection.length);
+  console.log('- Creatures available:', creatures.length);
+  
+  // Clear encounter area
+  encounterArea.innerHTML = '';
+  
+  // Force a Pokemon encounter
+  console.log('Forcing Pokemon encounter...');
   catchPokemon();
-  return 'Pokemon encounter test completed - check the encounter area';
+  
+  console.log('=== TESTING EGG GENERATION ===');
+  // Test egg generation
+  generateEgg();
+  console.log('Generated egg, current eggs:', state.eggs.length);
+  
+  return 'Pokemon encounter and egg test completed - check the encounter area and eggs bar';
 }
 
-// Make test function available globally
+// Test egg hatching specifically
+function testEggHatching() {
+  console.log('=== TESTING EGG HATCHING ===');
+  
+  // Create a quick-hatch egg for testing
+  const testEgg = {
+    id: Date.now() + 999,
+    type: 'common',
+    hatchTime: Date.now() + 5000, // 5 seconds
+    progress: 0
+  };
+  
+  state.eggs.push(testEgg);
+  renderEggs();
+  console.log('Created test egg that will hatch in 5 seconds');
+  
+  return 'Test egg created - it will hatch in 5 seconds!';
+}
+
+// Make test functions available globally
 window.testPokemonEncounter = testPokemonEncounter;
+window.testEggHatching = testEggHatching;
