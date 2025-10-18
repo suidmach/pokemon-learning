@@ -595,6 +595,9 @@ function handleAnswer(isCorrect) {
     // Check for achievements
     checkAchievements();
     
+    // Trigger random events (Team Rocket, special encounters, etc.)
+    checkForRandomEvents();
+    
   } else {
     state.streak = 0;
     
@@ -603,6 +606,32 @@ function handleAnswer(isCorrect) {
       const num = currentQuestion.number;
       state.mistakes[num] = (state.mistakes[num] || 0) + 1;
     }
+  }
+}
+
+// ========== RANDOM EVENTS SYSTEM ==========
+function checkForRandomEvents() {
+  // Team Rocket appears every 20-30 correct answers
+  if (state.correctTotal > 0 && state.correctTotal % 25 === 0 && state.collection.length >= 5) {
+    if (Math.random() < 0.7) { // 70% chance when conditions are met
+      setTimeout(() => {
+        if (confirm('🚀 Team Rocket appeared! Do you want to battle them for a rare Pokemon?')) {
+          startRocketBattle();
+        }
+      }, 1000);
+    }
+  }
+  
+  // Legendary encounter chance for high streaks
+  if (state.streak >= 15 && Math.random() < 0.1) {
+    setTimeout(() => {
+      encounterArea.innerHTML += `
+        <div class="legendary-event">
+          <div>🌟 A legendary presence is felt nearby... 🌟</div>
+          <div class="small">Your streak is attracting powerful Pokemon!</div>
+        </div>
+      `;
+    }, 500);
   }
 }
 
@@ -635,16 +664,18 @@ function updateStats() {
 
 // ========== POKEMON AND ACHIEVEMENTS ==========
 function catchPokemon() {
-  console.log('catchPokemon() called');
+  console.log('=== CATCHPOKEMON FUNCTION CALLED ===');
   console.log('Current collection size:', state.collection.length);
   console.log('Available creatures:', creatures.length);
+  console.log('encounterArea element:', encounterArea);
   
   if (!creatures || creatures.length === 0) {
     console.error('ERROR: creatures array is not defined or empty!');
     encounterArea.innerHTML = `
-      <div class="pokemon-encounter">
+      <div class="pokemon-encounter error-encounter">
         <div class="pokemon-caught">❌</div>
         <div>Pokemon data not loaded!</div>
+        <div class="small">Check console for details</div>
       </div>
     `;
     return;
@@ -656,13 +687,15 @@ function catchPokemon() {
   // If all Pokemon are caught, allow duplicates but show special message
   if (availablePokemon.length === 0) {
     const allPokemon = creatures[Math.floor(Math.random() * creatures.length)];
-    encounterArea.innerHTML = `
+    const shinyHTML = `
       <div class="pokemon-encounter shiny-encounter">
         <div class="pokemon-caught">✨${allPokemon.emoji}✨</div>
         <div>Shiny ${allPokemon.name} appeared!</div>
         <div class="small">You already caught all Pokémon! This is a rare shiny variant!</div>
       </div>
     `;
+    console.log('Setting shiny encounter HTML');
+    encounterArea.innerHTML = shinyHTML;
     speak(`Amazing! A shiny ${allPokemon.name} appeared!`);
     updateCollectionBar();
     save();
@@ -701,7 +734,9 @@ function catchPokemon() {
   
   console.log('Selected Pokemon:', pokemon.name, pokemon.rarity);
   
+  // Add to collection BEFORE displaying
   state.collection.push(pokemon.name);
+  console.log('Added to collection. New collection size:', state.collection.length);
   
   // Special message for rare encounters
   let encounterMessage = `You caught ${pokemon.name}!`;
@@ -724,11 +759,21 @@ function catchPokemon() {
       <div>${encounterMessage}</div>
       <div class="small">${pokemon.description}</div>
       <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
+      <div class="small">Collection: ${state.collection.length}/151</div>
     </div>
   `;
   
-  console.log('Setting encounterArea HTML');
-  encounterArea.innerHTML = encounterHTML;
+  console.log('Setting encounterArea HTML:', encounterHTML);
+  
+  // Force the encounter to display
+  if (encounterArea) {
+    encounterArea.innerHTML = encounterHTML;
+    encounterArea.style.display = 'block';
+    encounterArea.style.visibility = 'visible';
+    console.log('encounterArea innerHTML set successfully');
+  } else {
+    console.error('encounterArea element not found!');
+  }
   
   speak(encounterMessage);
   updateCollectionBar();
@@ -739,7 +784,7 @@ function catchPokemon() {
   // Force a save to make sure progress is retained
   save();
   
-  console.log('Pokemon encounter completed successfully');
+  console.log('=== POKEMON ENCOUNTER COMPLETED ===');
 }
 
 function updateCollectionBar() {
@@ -879,13 +924,19 @@ function checkEggs() {
 }
 
 function hatchEgg(eggId) {
+  console.log('=== HATCHING EGG ===');
   const eggIndex = state.eggs.findIndex(egg => egg.id === eggId);
-  if (eggIndex === -1) return;
+  if (eggIndex === -1) {
+    console.log('Egg not found:', eggId);
+    return;
+  }
   
   const egg = state.eggs[eggIndex];
+  console.log('Hatching egg:', egg);
   state.eggs.splice(eggIndex, 1);
   
-  console.log('Hatching egg of type:', egg.type);
+  console.log('Egg type:', egg.type);
+  console.log('Available creatures:', creatures ? creatures.length : 'undefined');
   
   // Hatch a pokemon of the egg's rarity
   const availablePokemon = creatures.filter(c => 
@@ -896,26 +947,37 @@ function hatchEgg(eggId) {
   
   if (availablePokemon.length > 0) {
     const pokemon = availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
+    
+    // Add to collection AND hatched list
     state.collection.push(pokemon.name);
     state.hatched.push(pokemon.name);
     
-    console.log('Hatched Pokemon:', pokemon.name);
+    console.log('Hatched Pokemon:', pokemon.name, 'Collection size now:', state.collection.length);
     
-    encounterArea.innerHTML = `
+    const hatchHTML = `
       <div class="egg-hatch">
         <div class="hatch-animation">🥚 ➡️ ${pokemon.emoji}</div>
         <div>Your egg hatched into ${pokemon.name}!</div>
         <div class="small">${pokemon.description}</div>
         <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
+        <div class="small">Collection: ${state.collection.length}/151</div>
       </div>
     `;
+    
+    // Force the hatch message to display
+    if (encounterArea) {
+      encounterArea.innerHTML = hatchHTML;
+      encounterArea.style.display = 'block';
+      encounterArea.style.visibility = 'visible';
+      console.log('Egg hatch message displayed');
+    }
     
     speak(`Your egg hatched into ${pokemon.name}!`);
     updateCollectionBar();
     
     // Clear the hatch message after a few seconds
     setTimeout(() => {
-      if (encounterArea.innerHTML.includes('egg-hatch')) {
+      if (encounterArea && encounterArea.innerHTML.includes('egg-hatch')) {
         encounterArea.innerHTML = '';
       }
     }, 6000);
@@ -930,40 +992,54 @@ function hatchEgg(eggId) {
       state.collection.push(pokemon.name);
       state.hatched.push(pokemon.name);
       
-      console.log('Hatched any available Pokemon:', pokemon.name);
+      console.log('Hatched any available Pokemon:', pokemon.name, 'Collection size now:', state.collection.length);
       
-      encounterArea.innerHTML = `
+      const hatchHTML = `
         <div class="egg-hatch">
           <div class="hatch-animation">🥚 ➡️ ${pokemon.emoji}</div>
           <div>Your egg hatched into ${pokemon.name}!</div>
           <div class="small">${pokemon.description}</div>
           <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
+          <div class="small">Collection: ${state.collection.length}/151</div>
         </div>
       `;
+      
+      if (encounterArea) {
+        encounterArea.innerHTML = hatchHTML;
+        encounterArea.style.display = 'block';
+        encounterArea.style.visibility = 'visible';
+      }
       
       speak(`Your egg hatched into ${pokemon.name}!`);
       updateCollectionBar();
       
       setTimeout(() => {
-        if (encounterArea.innerHTML.includes('egg-hatch')) {
+        if (encounterArea && encounterArea.innerHTML.includes('egg-hatch')) {
           encounterArea.innerHTML = '';
         }
       }, 6000);
     } else {
       // All Pokemon caught - give a special message
-      encounterArea.innerHTML = `
+      console.log('All Pokemon already caught');
+      const specialHTML = `
         <div class="egg-hatch">
           <div>🥚 ➡️ ✨</div>
           <div>Your egg hatched into stardust!</div>
           <div class="small">You've caught all available Pokemon!</div>
         </div>
       `;
+      
+      if (encounterArea) {
+        encounterArea.innerHTML = specialHTML;
+      }
+      
       speak('Your egg hatched into stardust! You have caught all Pokemon!');
     }
   }
   
   renderEggs();
   save(); // Important: Save progress after hatching
+  console.log('=== EGG HATCHING COMPLETED ===');
 }
 
 function renderEggs() {
@@ -1074,6 +1150,52 @@ function testEggHatching() {
   return 'Test egg created - it will hatch in 5 seconds!';
 }
 
+// Debug function to check game state
+function debugGameState() {
+  console.log('=== GAME STATE DEBUG ===');
+  console.log('Collection size:', state.collection.length);
+  console.log('Collection:', state.collection);
+  console.log('Creatures array available:', creatures ? creatures.length : 'NO');
+  console.log('Eggs:', state.eggs.length);
+  console.log('Current streak:', state.streak);
+  console.log('Total correct:', state.correctTotal);
+  console.log('encounterArea element:', document.getElementById('encounterArea'));
+  console.log('collectionBar element:', document.getElementById('collectionBar'));
+  
+  // Force update collection bar
+  updateCollectionBar();
+  
+  return 'Debug info logged to console';
+}
+
+// Force a Pokemon encounter regardless of conditions
+function forceEncounter() {
+  console.log('=== FORCING POKEMON ENCOUNTER ===');
+  // Temporarily clear collection to ensure we have available Pokemon
+  const originalCollection = [...state.collection];
+  if (state.collection.length > 145) {
+    console.log('Collection nearly full, temporarily resetting for test');
+    state.collection = [];
+  }
+  
+  catchPokemon();
+  
+  // If we temporarily cleared it, restore original but add the new Pokemon
+  if (originalCollection.length > 145) {
+    state.collection = [...originalCollection];
+    updateCollectionBar();
+  }
+  
+  return 'Forced encounter completed';
+}
+
 // Make test functions available globally
 window.testPokemonEncounter = testPokemonEncounter;
 window.testEggHatching = testEggHatching;
+window.debugGameState = debugGameState;
+window.forceEncounter = forceEncounter;
+
+// Make Team Rocket functions available globally (defined in ui-screens.js)
+window.startRocketBattle = window.startRocketBattle || function() {
+  console.log('Team Rocket function not yet loaded - will be available after ui-screens.js loads');
+};
