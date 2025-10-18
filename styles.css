@@ -348,44 +348,83 @@ button:active {
   z-index: 3;
 }
 
-.hour-12 {
+.hour-12, .hour-1, .hour-2, .hour-3, .hour-4, .hour-5, .hour-6, .hour-7, .hour-8, .hour-9, .hour-10, .hour-11 {
   position: absolute;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.hour-12 {
   top: 15px;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--text);
+}
+
+.hour-1 {
+  top: 25px;
+  right: 35px;
+  transform: rotate(30deg);
+}
+
+.hour-2 {
+  top: 50px;
+  right: 20px;
+  transform: rotate(60deg);
 }
 
 .hour-3 {
-  position: absolute;
   top: 50%;
   right: 15px;
   transform: translateY(-50%);
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--text);
+}
+
+.hour-4 {
+  bottom: 50px;
+  right: 20px;
+  transform: rotate(-60deg);
+}
+
+.hour-5 {
+  bottom: 25px;
+  right: 35px;
+  transform: rotate(-30deg);
 }
 
 .hour-6 {
-  position: absolute;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--text);
+}
+
+.hour-7 {
+  bottom: 25px;
+  left: 35px;
+  transform: rotate(30deg);
+}
+
+.hour-8 {
+  bottom: 50px;
+  left: 20px;
+  transform: rotate(60deg);
 }
 
 .hour-9 {
-  position: absolute;
   top: 50%;
   left: 15px;
   transform: translateY(-50%);
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--text);
+}
+
+.hour-10 {
+  top: 50px;
+  left: 20px;
+  transform: rotate(-60deg);
+}
+
+.hour-11 {
+  top: 25px;
+  left: 35px;
+  transform: rotate(-30deg);
 }
 
 .time-sequence {
@@ -833,6 +872,20 @@ button:active {
   .hour-6 { bottom: 8px; }
   .hour-3 { right: 8px; }
   .hour-9 { left: 8px; }
+  
+  /* Additional clock numbers for mobile */
+  .hour-1, .hour-2, .hour-4, .hour-5, .hour-7, .hour-8, .hour-10, .hour-11 {
+    font-size: 1rem;
+  }
+  
+  .hour-1 { top: 15px; right: 25px; }
+  .hour-2 { top: 35px; right: 15px; }
+  .hour-4 { bottom: 35px; right: 15px; }
+  .hour-5 { bottom: 15px; right: 25px; }
+  .hour-7 { bottom: 15px; left: 25px; }
+  .hour-8 { bottom: 35px; left: 15px; }
+  .hour-10 { top: 35px; left: 15px; }
+  .hour-11 { top: 15px; left: 25px; }
   
   .math-display {
     font-size: 2rem;
