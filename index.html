@@ -153,6 +153,154 @@
     <div class="center"><button id="continueFromVictory">Continue Adventure</button></div>
   </div>
 
-  <script src="game.js"></script>
+  <!-- Load JavaScript modules in correct order -->
+  <script src="pokemon-data.js"></script>
+  <script src="questions-data.js"></script>
+  <script src="game-core.js"></script>
+  <script src="ui-screens.js"></script>
+  
+  <!-- Main initialization script -->
+  <script>
+    // ========== MAIN INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      load();
+      showScreen('menu');
+      updateCollectionBar();
+      renderAchievements();
+      renderEggs();
+      updateModeButtons();
+      updateGradeButtons();
+      
+      gameTimerInterval = setInterval(checkEggs, 1000);
+
+      // Grade level selection
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById(`grade${i}`).onclick = () => {
+          state.gradeLevel = i;
+          updateGradeButtons();
+          save();
+        };
+      }
+      
+      // Game mode selection
+      document.getElementById('numbersMode').onclick = () => {
+        state.gameMode = 'numbers';
+        updateModeButtons();
+        save();
+      };
+      
+      document.getElementById('readingMode').onclick = () => {
+        state.gameMode = 'reading';
+        updateModeButtons();
+        save();
+      };
+      
+      document.getElementById('mathMode').onclick = () => {
+        state.gameMode = 'math';
+        updateModeButtons();
+        save();
+      };
+      
+      document.getElementById('timeMode').onclick = () => {
+        state.gameMode = 'time';
+        updateModeButtons();
+        save();
+      };
+      
+      document.getElementById('scienceMode').onclick = () => {
+        state.gameMode = 'science';
+        updateModeButtons();
+        save();
+      };
+      
+      document.getElementById('mixedMode').onclick = () => {
+        state.gameMode = 'mixed';
+        updateModeButtons();
+        save();
+      };
+      
+      // Screen navigation
+      document.getElementById('playBtn').onclick = () => {
+        showScreen('game');
+        updateStats();
+        nextQuestion();
+      };
+      
+      document.getElementById('mapBtn').onclick = () => {
+        renderProgressMap();
+        showScreen('map');
+      };
+      
+      document.getElementById('dexBtn').onclick = () => {
+        renderPokedex();
+        showScreen('dex');
+      };
+      
+      document.getElementById('analyticsBtn').onclick = () => {
+        renderAnalytics();
+        showScreen('analytics');
+      };
+      
+      document.getElementById('backFromMap').onclick = () => showScreen('menu');
+      document.getElementById('backFromDex').onclick = () => showScreen('menu');
+      document.getElementById('backFromAnalytics').onclick = () => showScreen('menu');
+      
+      // Game controls
+      document.getElementById('quitBtn').onclick = quitToMenu;
+      document.getElementById('continueBtn').onclick = nextQuestion;
+      document.getElementById('submitBtn').onclick = submitAnswer;
+      document.getElementById('hintBtn').onclick = showHint;
+      
+      // Team Rocket battle controls
+      document.getElementById('forfeitRocket').onclick = forfeitRocketBattle;
+      document.getElementById('continueFromVictory').onclick = () => {
+        showScreen('game');
+        nextQuestion();
+      };
+      
+      // Settings
+      soundToggle.onchange = () => {
+        state.sound = soundToggle.checked;
+        save();
+      };
+      
+      hintsToggle.onchange = () => {
+        state.hints = hintsToggle.checked;
+        save();
+      };
+      
+      document.getElementById('resetBtn').onclick = () => {
+        if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      };
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        
+        if (e.key === ' ' && continueBtn.style.display !== 'none') {
+          e.preventDefault();
+          nextQuestion();
+        }
+        if (e.key === 'h' && hintBtn.style.display !== 'none') {
+          e.preventDefault();
+          showHint();
+        }
+        if (e.key === 'Enter' && inputRow.style.display !== 'none') {
+          e.preventDefault();
+          submitAnswer();
+        }
+      });
+      
+      // Input handling
+      answerInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          submitAnswer();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
