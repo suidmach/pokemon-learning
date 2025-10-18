@@ -311,17 +311,25 @@ function generateTimeQuestion(gradeContent) {
 }
 
 function generateClockQuestion() {
-  const hour = Math.floor(Math.random() * 12) + 1;
-  const minutes = [0, 15, 30, 45][Math.floor(Math.random() * 4)];
+  const gradeLevel = state.gradeLevel;
+  let hour, minutes;
   
-  let timeString;
-  if (minutes === 0) {
-    timeString = `${hour}:00`;
-  } else if (minutes === 30) {
-    timeString = `${hour}:30`;
+  // Generate appropriate difficulty based on grade
+  if (gradeLevel <= 2) {
+    // Grades 1-2: Focus on hour and half-hour
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = [0, 30][Math.floor(Math.random() * 2)];
+  } else if (gradeLevel <= 4) {
+    // Grades 3-4: Add quarter hours and 5-minute intervals
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55][Math.floor(Math.random() * 12)];
   } else {
-    timeString = `${hour}:${minutes}`;
+    // Grades 5-6: Any time, including tricky ones
+    hour = Math.floor(Math.random() * 12) + 1;
+    minutes = Math.floor(Math.random() * 60);
   }
+  
+  const timeString = `${hour}:${minutes.toString().padStart(2, '0')}`;
   
   currentQuestion = {
     type: 'time',
@@ -331,14 +339,22 @@ function generateClockQuestion() {
   };
 
   questionEl.innerHTML = `
-    <div>What time is shown?</div>
+    <div>What time does this clock show?</div>
     <div class="clock-display">
       <div class="analog-clock">
         <div class="clock-face">
           <div class="hour-12">12</div>
+          <div class="hour-1">1</div>
+          <div class="hour-2">2</div>
           <div class="hour-3">3</div>
+          <div class="hour-4">4</div>
+          <div class="hour-5">5</div>
           <div class="hour-6">6</div>
+          <div class="hour-7">7</div>
+          <div class="hour-8">8</div>
           <div class="hour-9">9</div>
+          <div class="hour-10">10</div>
+          <div class="hour-11">11</div>
           <div class="hour-hand" style="transform: rotate(${(hour % 12) * 30 + minutes * 0.5}deg)"></div>
           <div class="minute-hand" style="transform: rotate(${minutes * 6}deg)"></div>
           <div class="clock-center"></div>
@@ -347,15 +363,30 @@ function generateClockQuestion() {
     </div>
   `;
   
-  speak(`What time is shown on the clock?`);
+  speak(`What time does this clock show?`);
 
-  const wrongTimes = [
-    `${hour === 12 ? 1 : hour + 1}:${minutes.toString().padStart(2, '0')}`,
-    `${hour === 1 ? 12 : hour - 1}:${minutes.toString().padStart(2, '0')}`,
-    `${hour}:${(minutes + 15) % 60}`.replace(':0', ':00')
-  ];
+  // Generate challenging wrong answers
+  const wrongTimes = [];
   
-  const options = [timeString, ...wrongTimes].sort(() => Math.random() - 0.5);
+  // Off by 5 minutes (common reading error)
+  if (minutes >= 5) wrongTimes.push(`${hour}:${(minutes - 5).toString().padStart(2, '0')}`);
+  if (minutes <= 55) wrongTimes.push(`${hour}:${(minutes + 5).toString().padStart(2, '0')}`);
+  
+  // Off by 15 minutes (quarter hour confusion)
+  wrongTimes.push(`${hour}:${((minutes + 15) % 60).toString().padStart(2, '0')}`);
+  
+  // Hour hand confusion (reading wrong hour when minute hand is past 30)
+  const nextHour = hour === 12 ? 1 : hour + 1;
+  const prevHour = hour === 1 ? 12 : hour - 1;
+  if (minutes > 30) {
+    wrongTimes.push(`${nextHour}:${minutes.toString().padStart(2, '0')}`);
+  } else if (minutes > 0) {
+    wrongTimes.push(`${prevHour}:${minutes.toString().padStart(2, '0')}`);
+  }
+  
+  // Remove duplicates and current answer
+  const uniqueWrongTimes = [...new Set(wrongTimes)].filter(t => t !== timeString);
+  const options = [timeString, ...uniqueWrongTimes.slice(0, 3)].sort(() => Math.random() - 0.5);
   createOptionsButtons(options, timeString);
 }
 
