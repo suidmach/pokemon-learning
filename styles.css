@@ -583,6 +583,43 @@ button:active {
   border: 2px solid #ec4899;
 }
 
+.uncommon-encounter {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 2px solid #3b82f6;
+}
+
+.shiny-encounter {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 2px solid #f59e0b;
+  animation: shimmer 1.5s infinite;
+}
+
+.pokemon-search {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 2px dashed #94a3b8;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  margin: 10px 0;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.egg-hatch {
+  background: linear-gradient(135deg, #fefce8, #fef3c7);
+  border: 2px solid var(--accent);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin: 15px 0;
+  text-align: center;
+  animation: hatchGlow 2s ease-out;
+}
+
+.hatch-animation {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: hatchBounce 1s ease-out;
+}
+
 .pokemon-caught {
   font-size: 3rem;
   margin-bottom: 10px;
@@ -990,6 +1027,23 @@ button:active {
 }
 
 /* Print styles */
+@keyframes shimmer {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+}
+
+@keyframes hatchGlow {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes hatchBounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
 @media print {
   body::before { display: none; }
   .screen { box-shadow: none; }
