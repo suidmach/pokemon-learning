@@ -526,9 +526,31 @@ function handleAnswer(isCorrect) {
       }
     }
     
-    // Pokemon encounter
-    if (Math.random() < 0.3) { // 30% chance
+    // Enhanced Pokemon encounter system
+    let encounterChance = 0.4; // Base 40% chance
+    
+    // Increase chance based on streak
+    if (state.streak >= 5) encounterChance += 0.1;
+    if (state.streak >= 10) encounterChance += 0.1;
+    if (state.streak >= 20) encounterChance += 0.1;
+    
+    // Guarantee encounter every 5 correct answers to prevent dry spells
+    const guaranteedEncounter = state.correctTotal % 5 === 0;
+    
+    if (guaranteedEncounter || Math.random() < encounterChance) {
       catchPokemon();
+    }
+    
+    // Egg generation - 20% chance per correct answer
+    if (Math.random() < 0.2 && state.eggs.length < 6) {
+      generateEgg();
+      encounterArea.innerHTML += `
+        <div class="egg-find" style="margin-top: 10px;">
+          <div>🥚 You found a mysterious egg!</div>
+          <div class="small">It will hatch soon...</div>
+        </div>
+      `;
+      speak('You found a mysterious egg!');
     }
     
     // Check for achievements
@@ -549,6 +571,16 @@ function showFeedback(isCorrect, userAnswer) {
   if (isCorrect) {
     feedbackEl.innerHTML = '<span class="success">✅ Correct!</span>';
     speak('Correct!');
+    
+    // Debug info for tracking encounters (remove in production)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      const debugInfo = `
+        <div class="small" style="margin-top: 5px; opacity: 0.7;">
+          Debug: Streak ${state.streak} | Total ${state.correctTotal} | Collection ${state.collection.length}/151
+        </div>
+      `;
+      feedbackEl.innerHTML += debugInfo;
+    }
   } else {
     const correctAnswer = currentQuestion.answer;
     feedbackEl.innerHTML = `<span class="error">❌ Not quite. The answer was: ${correctAnswer}</span>`;
@@ -565,31 +597,74 @@ function updateStats() {
 // ========== POKEMON AND ACHIEVEMENTS ==========
 function catchPokemon() {
   const availablePokemon = creatures.filter(c => !state.collection.includes(c.name));
-  if (availablePokemon.length === 0) return;
   
-  // Determine rarity based on streak
+  // If all Pokemon are caught, allow duplicates but show special message
+  if (availablePokemon.length === 0) {
+    const allPokemon = creatures[Math.floor(Math.random() * creatures.length)];
+    encounterArea.innerHTML = `
+      <div class="pokemon-encounter">
+        <div class="pokemon-caught">✨${allPokemon.emoji}✨</div>
+        <div>Shiny ${allPokemon.name} appeared!</div>
+        <div class="small">You already caught all Pokémon! This is a rare shiny variant!</div>
+      </div>
+    `;
+    speak(`Amazing! A shiny ${allPokemon.name} appeared!`);
+    updateCollectionBar();
+    return;
+  }
+  
+  // Determine rarity based on streak with better distribution
   let rarity = 'common';
-  if (state.streak >= 10) rarity = 'uncommon';
-  if (state.streak >= 20) rarity = 'rare';
-  if (state.streak >= 50) rarity = 'legendary';
+  if (state.streak >= 5) rarity = 'uncommon';
+  if (state.streak >= 15) rarity = 'rare';
+  if (state.streak >= 25) rarity = 'legendary';
   
-  const pokemonOfRarity = availablePokemon.filter(p => p.rarity === rarity);
+  // Try to get Pokemon of desired rarity, fallback to any available
+  let pokemonOfRarity = availablePokemon.filter(p => p.rarity === rarity);
+  
+  // If no Pokemon of desired rarity, try the next best
+  if (pokemonOfRarity.length === 0 && rarity === 'legendary') {
+    pokemonOfRarity = availablePokemon.filter(p => p.rarity === 'rare');
+  }
+  if (pokemonOfRarity.length === 0 && (rarity === 'legendary' || rarity === 'rare')) {
+    pokemonOfRarity = availablePokemon.filter(p => p.rarity === 'uncommon');
+  }
+  if (pokemonOfRarity.length === 0) {
+    pokemonOfRarity = availablePokemon.filter(p => p.rarity === 'common');
+  }
+  
   const pokemon = pokemonOfRarity.length > 0 
     ? pokemonOfRarity[Math.floor(Math.random() * pokemonOfRarity.length)]
     : availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
   
   state.collection.push(pokemon.name);
   
+  // Special message for rare encounters
+  let encounterMessage = `You caught ${pokemon.name}!`;
+  let extraClass = '';
+  
+  if (pokemon.rarity === 'legendary') {
+    encounterMessage = `🌟 LEGENDARY ENCOUNTER! You caught ${pokemon.name}! 🌟`;
+    extraClass = 'legendary-encounter';
+  } else if (pokemon.rarity === 'rare') {
+    encounterMessage = `✨ RARE ENCOUNTER! You caught ${pokemon.name}! ✨`;
+    extraClass = 'rare-encounter';
+  }
+  
   encounterArea.innerHTML = `
-    <div class="pokemon-encounter">
+    <div class="pokemon-encounter ${extraClass}">
       <div class="pokemon-caught">${pokemon.emoji}</div>
-      <div>You caught ${pokemon.name}!</div>
+      <div>${encounterMessage}</div>
       <div class="small">${pokemon.description}</div>
+      <div class="small">Rarity: ${pokemon.rarity} | Type: ${pokemon.type}</div>
     </div>
   `;
   
-  speak(`You caught ${pokemon.name}!`);
+  speak(encounterMessage);
   updateCollectionBar();
+  
+  // Update eggs display
+  renderEggs();
 }
 
 function updateCollectionBar() {
