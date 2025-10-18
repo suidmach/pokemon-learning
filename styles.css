@@ -604,6 +604,37 @@ button:active {
   opacity: 0.7;
 }
 
+.error-encounter {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 2px solid #ef4444;
+  animation: shake 0.5s ease-in-out;
+}
+
+.legendary-event {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 2px solid #f59e0b;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  margin: 10px 0;
+  text-align: center;
+  animation: shimmer 2s infinite;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 2px solid #ef4444;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 .egg-hatch {
   background: linear-gradient(135deg, #fefce8, #fef3c7);
   border: 2px solid var(--accent);
