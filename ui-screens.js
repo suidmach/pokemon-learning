@@ -203,6 +203,19 @@ function renderPokedex() {
   const dexGrid = document.getElementById('dexGrid');
   const progress = document.getElementById('dexProgress');
   
+  // Verify creatures data is loaded
+  if (!creatures || creatures.length === 0) {
+    console.error('ERROR: creatures array not loaded for Pokedex!');
+    dexGrid.innerHTML = `
+      <div class="error-message">
+        <div>❌ Pokemon data not loaded!</div>
+        <div class="small">Please refresh the page and try again.</div>
+      </div>
+    `;
+    progress.textContent = 'Error loading Pokemon data';
+    return;
+  }
+  
   progress.textContent = `${state.collection.length} / ${creatures.length} caught`;
   
   dexGrid.innerHTML = creatures.map((creature, index) => {
